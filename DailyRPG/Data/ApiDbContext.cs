@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using DailyRpg.Models;
 
-namespace ApiDbContext.Data
+namespace DailyRpg.Data
 {
-    public class ApiDbContext_class : DbContext//Db context vem do padrao do EF
+    public class ApiDbContext : DbContext//Db context vem do padrao do EF
     {
         //construtor padrao:
-        public ApiDbContext_class(DbContextOptions<ApiDbContext_class> options) : base(options)
+        public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
         {
         }
         //tabelas  

@@ -1,15 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using ApiDbContext.Data;
-using Microsoft.VisualBasic;
-using Microsoft.AspNetCore.Connections;
-using Microsoft.Extensions.Options;
+using DailyRpg.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //string de conexao
 var connectionString = builder.Configuration.GetConnectionString("conexaoMySQL");
 
-builder.Services.AddDbContext<ApiDbContext_class>(options =>
+builder.Services.AddDbContext<ApiDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
 

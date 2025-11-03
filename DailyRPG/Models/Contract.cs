@@ -11,9 +11,7 @@ namespace DailyRpg.Models
         public required int CoinReward { get; set; } = 100;
 
         public DateTime StartDate { get; set; }
-
-        public DateTime EndDate { get; set; }
-
-        public required bool IsComplet { get; set; } = false;
+        
+        public required bool IsCompleted { get; set; } = false;
     }
 }

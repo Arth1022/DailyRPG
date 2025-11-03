@@ -2,10 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DailyRpg.Data;
 using DailyRpg.Models;
-using Microsoft.VisualBasic;
-using System.Reflection.Metadata.Ecma335;
-using Microsoft.AspNetCore.Http.HttpResults;
-
 namespace DailyRpg.Controllers
 {
     [ApiController]
@@ -38,6 +34,24 @@ namespace DailyRpg.Controllers
         [HttpGet("active")] // /api/contracts/active
         public async Task<IActionResult> GetActiveContracts()
         {
+            //Logica de Falha
+            var today = DateTime.UtcNow;
+            var hunter = await _context.StatsUser.FirstOrDefaultAsync();
+            var failedContracts = await _context.Contracts.Where(c => !c.IsCompleted && c.StartDate < today).ToListAsync();
+            bool hasFailed = false;
+            if (hunter != null && failedContracts.Any())
+            {
+                foreach (var contract in failedContracts)
+                {
+                    hunter.CurrentHp -= 33;
+                    contract.IsCompleted = true;
+                    hasFailed = true;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+
             var contracts = await _context.Contracts.Where(c => !c.IsCompleted).OrderBy(c => c.StartDate).ToListAsync();
 
             return Ok(contracts);
@@ -54,5 +68,43 @@ namespace DailyRpg.Controllers
             }
             return Ok(contract);
         }
+
+        [HttpPut("{id}/complete")]
+        public async Task<IActionResult> CompleteContract(int id)
+        {
+            var contract = await _context.Contracts.FindAsync(id);
+            if (contract == null)
+            {
+                return NotFound(new { Message = "Contrato não encontrado." });
+            }
+            if (contract.IsCompleted)
+            {
+                return BadRequest(new { Message = "Contrato ja foi completo" });
+            }
+
+            var hunter = await _context.StatsUser.FirstOrDefaultAsync();
+            if (hunter == null)
+            {
+                return NotFound(new { Message = "User não foi encontrado." });
+            }
+            //Logica do jogo
+
+            contract.IsCompleted = true;
+            hunter.CurrentXp += contract.XpReward;
+
+            if (hunter.CurrentXp >= hunter.NextLevelXp)
+            {
+                hunter.Level++; //Sobe o level
+                hunter.NextLevelXp += 200; //Aumenta a qtd para o proximo nivel
+                hunter.CurrentXp -= hunter.NextLevelXp; //zera e deixa o restante 
+                hunter.CurrentHp = 100; //vida maxima!
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(hunter);
+
+        }
+
     }
 }

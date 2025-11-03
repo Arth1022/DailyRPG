@@ -1,4 +1,4 @@
-using System.Data;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace DailyRpg.Models
 {
@@ -14,6 +14,8 @@ namespace DailyRpg.Models
         public int? CurrentCoins { get; set; } = 0;
 
         public int? CurrentXp { get; set; } = 0;
+
+        public required int NextLevelXp { get; set; } = 700;
 
     }
 }
