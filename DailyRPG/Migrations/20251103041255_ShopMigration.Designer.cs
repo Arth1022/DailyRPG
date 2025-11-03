@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DailyRPG.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20251103014225_AddHunterTable")]
-    partial class AddHunterTable
+    [Migration("20251103041255_ShopMigration")]
+    partial class ShopMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,10 +65,16 @@ namespace DailyRPG.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CurrentCoins")
+                        .HasColumnType("int");
+
                     b.Property<int>("CurrentHp")
                         .HasColumnType("int");
 
                     b.Property<int>("CurrentXp")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HealingPotions")
                         .HasColumnType("int");
 
                     b.Property<string>("HunterName")
@@ -82,6 +88,9 @@ namespace DailyRPG.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("NextLevelXp")
+                        .HasColumnType("int");
+
+                    b.Property<int>("XpPotions")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

@@ -62,10 +62,16 @@ namespace DailyRPG.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CurrentCoins")
+                        .HasColumnType("int");
+
                     b.Property<int>("CurrentHp")
                         .HasColumnType("int");
 
                     b.Property<int>("CurrentXp")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HealingPotions")
                         .HasColumnType("int");
 
                     b.Property<string>("HunterName")
@@ -79,6 +85,9 @@ namespace DailyRPG.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("NextLevelXp")
+                        .HasColumnType("int");
+
+                    b.Property<int>("XpPotions")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

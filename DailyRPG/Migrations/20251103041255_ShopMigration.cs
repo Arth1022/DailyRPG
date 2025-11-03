@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DailyRPG.Migrations
 {
     /// <inheritdoc />
-    public partial class AddHunterTable : Migration
+    public partial class ShopMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,7 +48,10 @@ namespace DailyRPG.Migrations
                     CurrentHp = table.Column<int>(type: "int", nullable: false),
                     MaxHp = table.Column<int>(type: "int", nullable: false),
                     CurrentXp = table.Column<int>(type: "int", nullable: false),
-                    NextLevelXp = table.Column<int>(type: "int", nullable: false)
+                    NextLevelXp = table.Column<int>(type: "int", nullable: false),
+                    CurrentCoins = table.Column<int>(type: "int", nullable: false),
+                    HealingPotions = table.Column<int>(type: "int", nullable: false),
+                    XpPotions = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

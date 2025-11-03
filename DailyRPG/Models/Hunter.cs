@@ -11,5 +11,8 @@ namespace DailyRpg.Models
         public int MaxHp { get; set; } = 100;
         public int CurrentXp { get; set; } = 0;
         public int NextLevelXp { get; set; } = 700;
+        public int CurrentCoins { get; set; } = 0;
+        public int HealingPotions { get; set; } = 0;
+        public int XpPotions { get; set; } = 0;
     }
 }

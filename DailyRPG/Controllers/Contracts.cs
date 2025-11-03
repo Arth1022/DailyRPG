@@ -90,7 +90,15 @@ namespace DailyRpg.Controllers
             //Logica do jogo
 
             contract.IsCompleted = true;
-            hunter.CurrentXp += contract.XpReward;
+            if (hunter.XpDouble == true)
+            {
+                hunter.CurrentXp = hunter.CurrentXp * contract.XpReward;
+            }
+            else
+            {
+                hunter.CurrentXp += contract.XpReward;
+            }
+            hunter.XpDouble = false;
 
             if (hunter.CurrentXp >= hunter.NextLevelXp)
             {
