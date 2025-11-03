@@ -14,5 +14,6 @@ namespace DailyRpg.Models
         public int CurrentCoins { get; set; } = 0;
         public int HealingPotions { get; set; } = 0;
         public int XpPotions { get; set; } = 0;
+        public bool XpDouble { get; set; } = false;
     }
 }

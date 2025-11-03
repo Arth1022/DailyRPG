@@ -90,13 +90,18 @@ namespace DailyRpg.Controllers
             //Logica do jogo
 
             contract.IsCompleted = true;
+            int bonus = 1;
+            if (contract.Difficult == "Normal") { bonus = 2; }
+
+            else if (contract.Difficult == "Hard") { bonus = 3; }
+
             if (hunter.XpDouble == true)
             {
-                hunter.CurrentXp = hunter.CurrentXp * contract.XpReward;
+                hunter.CurrentXp = hunter.CurrentXp+(contract.XpReward * bonus *2);
             }
             else
             {
-                hunter.CurrentXp += contract.XpReward;
+                hunter.CurrentXp = hunter.CurrentXp+(contract.XpReward * bonus);
             }
             hunter.XpDouble = false;
 

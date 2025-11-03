@@ -7,7 +7,8 @@ namespace DailyRpg.Models
         public string? Descricao { get; set; }
         public required int XpReward { get; set; } = 100;
         public required int CoinReward { get; set; } = 100;
-        public DateTime StartDate { get; set; } 
+        public DateTime StartDate { get; set; }
         public required bool IsCompleted { get; set; } = false;
+        public required string Difficult { get; set; } = "Easy";
     }
 }

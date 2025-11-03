@@ -42,7 +42,7 @@ namespace DailyRpg.ShopControllers
 
             switch (itemId.ToLower())
             {
-                case "Heal":
+                case "heal":
                     ItemCost = 100;
                     if (hunter.CurrentCoins < ItemCost)
                     {
@@ -52,7 +52,7 @@ namespace DailyRpg.ShopControllers
                     hunter.HealingPotions++;
                     break;
 
-                case "XpDouble":
+                case "xpdoubler":
                     ItemCost = 150;
                     if (hunter.CurrentCoins < ItemCost)
                     {
