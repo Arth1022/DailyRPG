@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DailyRPG.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMySqlCreate : Migration
+    public partial class AddHunterTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,8 +28,7 @@ namespace DailyRPG.Migrations
                     XpReward = table.Column<int>(type: "int", nullable: false),
                     CoinReward = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    IsComplet = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsCompleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -45,10 +44,11 @@ namespace DailyRPG.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     HunterName = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CurrentHp = table.Column<int>(type: "int", nullable: false),
                     Level = table.Column<int>(type: "int", nullable: false),
-                    CurrentCoins = table.Column<int>(type: "int", nullable: true),
-                    CurrentXp = table.Column<int>(type: "int", nullable: true)
+                    CurrentHp = table.Column<int>(type: "int", nullable: false),
+                    MaxHp = table.Column<int>(type: "int", nullable: false),
+                    CurrentXp = table.Column<int>(type: "int", nullable: false),
+                    NextLevelXp = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

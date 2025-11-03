@@ -10,6 +10,7 @@ builder.Services.AddDbContext<ApiDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
 
+builder.Services.AddControllers();
 //Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

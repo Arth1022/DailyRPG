@@ -32,6 +32,8 @@ C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\
 C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\Microsoft.Extensions.Primitives.dll
 C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\Microsoft.OpenApi.dll
 C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\Mono.TextTemplating.dll
+C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\MySqlConnector.dll
+C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\Pomelo.EntityFrameworkCore.MySql.dll
 C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
@@ -129,5 +131,3 @@ C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\obj\
 C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\obj\Debug\net9.0\DailyRPG.pdb
 C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\obj\Debug\net9.0\DailyRPG.genruntimeconfig.cache
 C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\obj\Debug\net9.0\ref\DailyRPG.dll
-C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\MySqlConnector.dll
-C:\Users\Arthur\OneDrive\Documents\GitHub\DailyRPG\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\Pomelo.EntityFrameworkCore.MySql.dll

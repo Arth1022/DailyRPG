@@ -2,7 +2,7 @@ namespace DailyRpg.Models
 {
     public class Contract
     {
-        public required int Id {get; set;}
+        public required int Id { get; set; } = 0;
         public required string Title { get; set; }
         public string? Descricao { get; set; }
 
