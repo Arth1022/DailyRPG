@@ -122,10 +122,9 @@ namespace DailyRpg.Controllers
         [HttpGet("undone")]
         public async Task<IActionResult> UndoneContracts()
         {
-            var contrato = await _context.Contracts.Where(c => !c.IsCompleted).ToListAsync();
-            if (contrato == null)
+            var contrato = await _context.Contracts.Where(c => !c.IsCompleted);
             {
-                NotFound(new { Message = "Nenhum contrato encontrado" });
+                return NotFound(new { Message = "Nenhum contrato encontrado" });
             }
             return Ok(contrato);
         }
@@ -134,11 +133,25 @@ namespace DailyRpg.Controllers
         public async Task<IActionResult> SurrenderContract(int id)
         {
             var contract = await _context.Contracts.FindAsync(id);
+            var hunter = await _context.StatsUser.FirstOrDefaultAsync();
+            if (hunter == null)
+            {
+                BadRequest(new { Message = 'Nenhum user encontrado' });-
+            }
             if (contract == null)
             {
-                NotFound(new { Message = "Nenhum contrato encontrado" });
+                return NotFound(new { Message = "Nenhum contrato encontrado" });
             }
-            return NotFound();
+            contract.IsCompleted = true;
+            hunter.CurrentHp -= 33;
+            if (hunter.CurrentHp < 0)
+            {
+                hunter.CurrentHp = 1;
+            }
+            _context.Contract.Remove(contract);
+
+            await _context.SaveChangesAsync;
+
 
 
         }
