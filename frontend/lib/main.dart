@@ -1,4 +1,4 @@
-// lib/main.dart
+ // lib/main.dart
 
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
@@ -35,10 +35,15 @@ class HomeScreen extends StatefulWidget {
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
+  
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  
+  void _refreshHunterStats() {
+    setState(() {
+      _hunterStatsFuture = _apiService.fetchHunterStats();
+    });
+  }
   late Future<HunterUser> _hunterStatsFuture;
   final ApiService _apiService = ApiService();
 
@@ -153,7 +158,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 20.0),
 
                     // --- A LISTA DE TAREFAS ---
-                    const ContractList(),
+                    ContractList(
+                      onDataChanged: _refreshHunterStats,
+                    ),
 
                   ],
                 ),
