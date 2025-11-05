@@ -136,7 +136,7 @@ namespace DailyRpg.Controllers
             var hunter = await _context.StatsUser.FirstOrDefaultAsync();
             if (hunter == null)
             {
-                BadRequest(new { Message = 'Nenhum user encontrado' });-
+                BadRequest(new { Message = "Nenhum user encontrado"});
             }
             if (contract == null)
             {
