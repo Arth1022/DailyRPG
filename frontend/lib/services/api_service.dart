@@ -59,4 +59,15 @@ class ApiService{
       throw Exception('Falha ao conectar ao servidor (Complete)');
     }
   }
+  Future<void> surrenderContract(String id) async {
+    final response = await http.get(Uri.parse('$_baseUrl/surrender/$id'));
+
+    if (response.statusCode == 200 || response.statusCode == 204){
+      return;
+    } else {
+      print('ERRO NA API [CONTROLLER]: Status Code = ${response.statusCode}');
+      print('ERRO NA API [CONTROLLER]: Body = ${response.body}');
+    }
+    
+  }
 }

@@ -75,15 +75,12 @@ class _HomeScreenState extends State<HomeScreen> {
             return SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                // Esta é a Coluna "Mãe"
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     
                     const SizedBox(height: 60.0), 
-                    
-                    // --- BLOCO DA VIDA ---
-                    // A "Row" (Linha) dá à "Expanded" um limite de largura
+
                     Row(
                       children: [
                         const Icon(
@@ -93,7 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 10.0), 
 
-                        // "Expanded" corrige o erro de "largura infinita"
                         Expanded(
                           child: LifeBar(
                             currentHp: hunter.currentHp, 
@@ -105,7 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     
                     const SizedBox(height: 20.0),
 
-                    // --- BLOCO DO XP ---
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -125,8 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           SizedBox(height: 7,),
-                          
-                          // A "Row" (Linha) corrige o erro aqui também
+
                           Row(
                             children: [
                               const Icon(
@@ -136,7 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(width: 10.0),
 
-                              // "Expanded" corrige o erro de "largura infinita"
                               Expanded(
                                 child: XpProgressBar(
                                   currentXp: hunter.currentXp,

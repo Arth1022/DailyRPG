@@ -1,0 +1,6 @@
+@dailyrpg_HostAddress = http://localhost:5177
+
+GET {{dailyrpg_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
