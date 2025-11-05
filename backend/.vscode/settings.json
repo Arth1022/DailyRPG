@@ -1,0 +1,6 @@
+{
+    "dotnet.defaultSolution": "DailyRPG.sln",
+    "dataworkspace.excludedProjects": [
+        "DailyRpgDB/DailyRpgDB.sqlproj"
+    ]
+}
