@@ -3298,11 +3298,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\DailyRPG\\DailyRPGbackend\\DailyRPG\\DailyRPG.csproj",
+      "projectUniqueName": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\Nova pasta\\DailyRPGbackend\\DailyRPG\\DailyRPG.csproj",
       "projectName": "DailyRPG",
-      "projectPath": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\DailyRPG\\DailyRPGbackend\\DailyRPG\\DailyRPG.csproj",
+      "projectPath": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\Nova pasta\\DailyRPGbackend\\DailyRPG\\DailyRPG.csproj",
       "packagesPath": "C:\\Users\\Arthur\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\DailyRPG\\DailyRPGbackend\\DailyRPG\\obj\\",
+      "outputPath": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\Nova pasta\\DailyRPGbackend\\DailyRPG\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Arthur\\AppData\\Roaming\\NuGet\\NuGet.Config"

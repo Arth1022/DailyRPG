@@ -24,7 +24,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-
 //Swagger
 if (app.Environment.IsDevelopment())
 {

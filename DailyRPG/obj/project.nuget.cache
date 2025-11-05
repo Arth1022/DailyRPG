@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "NznzBZ9YmgQ=",
+  "dgSpecHash": "hCSqNndqQX8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\DailyRPG\\DailyRPGbackend\\DailyRPG\\DailyRPG.csproj",
+  "projectFilePath": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\Nova pasta\\DailyRPGbackend\\DailyRPG\\DailyRPG.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Arthur\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\Arthur\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.10\\microsoft.aspnetcore.openapi.9.0.10.nupkg.sha512",
