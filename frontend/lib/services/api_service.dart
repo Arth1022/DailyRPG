@@ -1,0 +1,62 @@
+import 'dart:convert';
+import 'package:dailyrpg/models/contract.dart';
+import 'package:http/http.dart' as http;
+import '../models/hunter_user.dart';
+
+class ApiService{
+  final String _baseUrl= "http://10.0.2.2:5164/api"; 
+
+  Future<HunterUser> fetchHunterStats() async {
+    try {
+      final response = await http.get(Uri.parse('$_baseUrl/HunterControllers/stats'));
+
+      if (response.statusCode == 200) {
+        return HunterUser.fromJson(jsonDecode(response.body));
+      } else {
+        print('ERRO API [Hunter]: Status Code = ${response.statusCode}');
+        print('ERRO API [Hunter]: Body = ${response.body}');
+        throw Exception('Falha ao carregar os stats do caçador (StatusCode: ${response.statusCode})');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [Hunter]: $e');
+      throw Exception('Falha ao conectar ao servidor (Hunter): $e');
+    }
+  }
+
+  Future<List<Contract>> fetchContracts() async{
+    try {
+      final response = await http.get(Uri.parse('$_baseUrl/ContractsControllers/undone'));
+      
+      if (response.statusCode == 200){
+        print('JSON RESPOSTA [Contracts]: ${response.body}');
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((jsonItem) => Contract.fromJson(jsonItem)).toList();
+      } 
+      else {
+        print('ERRO API [Contracts]: Status Code = ${response.statusCode}');
+        print('ERRO API [Contracts]: Body = ${response.body}');
+        throw Exception('Falha ao carregar contrato (StatusCode: ${response.statusCode})');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [Contracts]: $e');
+      throw Exception('Falha ao conectar ao servidor (Contracts): $e');
+    }
+  }
+  Future<void> completeContract(String id) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$_baseUrl/ContractsControllers/$id/complete/'),
+      );
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      } else {
+        print('ERRO API [Complete]: Status Code = ${response.statusCode}');
+        print('ERRO API [Complete]: Body = ${response.body}');
+        throw Exception('Falha ao completar o contrato');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [Complete]: $e');
+      throw Exception('Falha ao conectar ao servidor (Complete)');
+    }
+  }
+}

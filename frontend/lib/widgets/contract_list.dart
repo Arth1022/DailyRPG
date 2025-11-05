@@ -1,0 +1,123 @@
+import 'package:flutter/material.dart';
+
+import '../services/api_service.dart';
+import '../models/contract.dart';
+
+class ContractList extends StatefulWidget{
+  const ContractList({super.key});
+
+  @override
+  State<ContractList> createState() => _ContractListState();
+}
+
+class _ContractListState extends State<ContractList>{
+  final ApiService _apiService = ApiService();
+  late Future<List<Contract>> _contractsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _contractsFuture = _apiService.fetchContracts();
+  }
+
+  void _completeContract(String id) async {
+    try {
+      await _apiService.completeContract(id);
+      setState(() {
+        _contractsFuture = _apiService.fetchContracts();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Deu ruim chefe')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context){
+    return FutureBuilder<List<Contract>>(
+      future:_contractsFuture ,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting){
+          return const Center(child: CircularProgressIndicator(),);
+        }
+        if (snapshot.hasError){
+          return Center(
+            child: Text(
+              'Erro ao carregar contratos',
+            ),
+          );
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty){
+          return const Center(child: Text('Nenhum contrato ativo'),);
+        }
+        final contracts = snapshot.data!;
+
+        return Expanded(
+          child: ListView.builder(
+            itemCount: contracts.length,
+            itemBuilder: (context, index) {
+              final contract = contracts[index];
+
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                color: const Color(0xff222222),
+
+                child: ExpansionTile(
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          contract.title,
+                          style:  const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.check_box_outlined, color: Colors.green,),
+                        onPressed: () => _completeContract(contract.id)
+                      )
+                    ],
+                  ),
+
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column (
+                        children: [
+                          Text(contract.description),
+                          const SizedBox(height: 10,),
+
+                          Text("Inicio : ${contract.startDate?.toString() ?? 'N/A'}"),
+                          const SizedBox(height: 10,),
+
+                          Text("Recompensa: ${contract.xpReward} XP, ${contract.coinReward} G"),
+                          const SizedBox(height: 15,),
+
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: (){
+                                ////////////////////
+                                ///Logica de dessitir
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red[800],
+                              ),
+                              child: const Text('Desistir do contrato'),
+                            ),
+                          )
+
+                        ],
+                      )
+                    )
+                  ],
+                ),
+              );
+            }
+          ),
+        );
+      }
+    );
+  }
+}
