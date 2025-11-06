@@ -39,14 +39,14 @@ class XpProgressBar extends StatelessWidget {
             children: [
               
               Container(
-                color: const Color.fromARGB(255, 123, 77, 230),
+                color: Colors.transparent,
               ),
 
               FractionallySizedBox(
                 alignment: Alignment.centerLeft,
                 widthFactor: percentage,
                 child: Container(
-                  color: const Color(0xFFA67C52),
+                  color: Colors.green,
                 ),
               ),
 

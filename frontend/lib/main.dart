@@ -1,14 +1,13 @@
- // lib/main.dart
-
 import 'package:dailyrpg/screens/add_contract_screen.dart';
+import 'package:dailyrpg/screens/shop_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'services/api_service.dart';
 import 'models/hunter_user.dart';
 
 //widgets
-import 'widgets/xp_bar.dart';
-import 'widgets/health_bar.dart';
 import 'widgets/contract_list.dart';
+import 'widgets/hunter_header.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,17 +35,15 @@ class HomeScreen extends StatefulWidget {
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
-  
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  
- 
- void _refreshHunterStats() {
+  void _refreshHunterStats() {
     setState(() {
       _hunterStatsFuture = _apiService.fetchHunterStats();
     });
   }
+
   final _contractListKey = GlobalKey<ContractListState>();
 
   late Future<HunterUser> _hunterStatsFuture;
@@ -58,31 +55,54 @@ class _HomeScreenState extends State<HomeScreen> {
     _hunterStatsFuture = _apiService.fetchHunterStats();
   }
 
-  Future<void> _navigateAndRefresh(BuildContext content) async {
+  Future<void> _navigateToAddContract(BuildContext context) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AddContractScreen())
+      MaterialPageRoute(builder: (context) => const AddContractScreen()),
     );
-    if (result == true){
+    if (result == true) {
       _refreshHunterStats();
       _contractListKey.currentState?.refreshContracts();
+    }
+  }
+
+  void _navigateToShop(BuildContext context) async {
+    final result = await Navigator.push(
+        context, 
+        MaterialPageRoute(builder: (context) => const ShopScreen())
+    );
+    if (result == true) {
+      _refreshHunterStats();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateAndRefresh(context),
-        child: const Icon(Icons.add
-        ),
+      floatingActionButton: SpeedDial(
+        icon: Icons.menu,
+        activeIcon: Icons.close,
+        direction: SpeedDialDirection.up,
+        backgroundColor: Colors.red[800],
+        children: [
+          SpeedDialChild(
+            child: const Icon(Icons.shopping_basket_outlined),
+            label: 'Loja',
+            backgroundColor: Colors.purple,
+            onTap: () => _navigateToShop(context),
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.description),
+            label: 'Novo Contrato',
+            backgroundColor: Colors.green,
+            onTap: () => _navigateToAddContract(context),
+          )
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: FutureBuilder<HunterUser>(
         future: _hunterStatsFuture,
         builder: (context, snapshot) {
-          
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -97,7 +117,6 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           if (snapshot.hasData) {
-            
             final hunter = snapshot.data!;
 
             return SafeArea(
@@ -106,87 +125,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    
-                    const SizedBox(height: 60.0), 
-
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.favorite,
-                          color: Color(0xFFE53935),
-                          size: 25.0,
-                        ),
-                        const SizedBox(width: 10.0), 
-
-                        Expanded(
-                          child: LifeBar(
-                            currentHp: hunter.currentHp, 
-                            maxHp: hunter.maxHp
-                          ),
-                        ),
-                      ],
-                    ),
-                    
+                    HunterHeader(hunter: hunter),
                     const SizedBox(height: 20.0),
-
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            'CONTRACT PROGRESS',
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 207, 207, 207),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black,
-                                  blurRadius: 2.0,
-                                  offset: Offset(1.0,1.0)
-                                )
-                              ]
-                            ),
-                          ),
-                          SizedBox(height: 7,),
-
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.auto_stories,
-                                color: Color(0xFFA67C52),
-                                size: 25.0,
-                              ),
-                              const SizedBox(width: 10.0),
-
-                              Expanded(
-                                child: XpProgressBar(
-                                  currentXp: hunter.currentXp,
-                                  nextLevelXp: hunter.nextLevelXp,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10,),
-                          Text(
-                            'LVL: ${hunter.level} (${hunter.currentXp}/${hunter.nextLevelXp})',
-                            style: const TextStyle(
-                              fontSize: 16, 
-                              color: Color.fromARGB(255, 207, 207, 207), 
-                              fontWeight: FontWeight.bold
-                            ),
-                          ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 20.0),
-
-                    // --- A LISTA DE TAREFAS ---
                     ContractList(
                       key: _contractListKey,
                       onDataChanged: _refreshHunterStats,
-
                     ),
-
                   ],
                 ),
               ),
