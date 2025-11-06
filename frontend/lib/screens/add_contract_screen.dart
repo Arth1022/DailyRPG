@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
 class AddContractScreen extends StatefulWidget{
+  
   const AddContractScreen({super.key});
 
   @override
@@ -28,6 +29,7 @@ class _AddContractScreenState extends State<AddContractScreen> {
     _descController.dispose();
     _xpController.dispose();
     _coinController.dispose();
+    super.dispose();
   }
 
   Future<void> _submitForm() async {
@@ -40,10 +42,11 @@ class _AddContractScreenState extends State<AddContractScreen> {
 
     //Json pra mandar na API
     final contractData = {
-      'title': _titleController,
-      'descricao': _descController,
-      'xpReward': _xpController,
-      'coinReward': _coinController,
+      'id' : 0,
+      'title': _titleController.text,
+      'descricao': _descController.text,
+      'xpReward': int.tryParse(_xpController.text) ?? 0,
+      'coinReward': int.tryParse(_coinController.text) ?? 0,
       'isCompleted': false,
       'startDate': DateTime.now().toIso8601String(),
       'difficult': 'Normal',
@@ -98,10 +101,10 @@ class _AddContractScreenState extends State<AddContractScreen> {
                     decoration: const InputDecoration(labelText: 'XP'),
                     validator: (value){
                       if (value == null || value.isEmpty || value == 0){
-                        return 'Nenhum XP atribuido!';
+                        return 'Nenhum XP atribuido';
                       }
                       if (int.tryParse(value) == null){
-                        return 'XP deve ser um número!';
+                        return 'XP deve ser um número';
                       }
                       return null;
               
@@ -116,7 +119,7 @@ class _AddContractScreenState extends State<AddContractScreen> {
                         return 'Contrato sera gratuito mesmo?';
                       }
                       if (int.tryParse(value) == null){
-                        return 'Coin deve ser um número!';
+                        return 'Coin deve ser um número';
                       }
                       return null;
                     },

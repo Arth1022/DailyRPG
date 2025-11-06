@@ -1,10 +1,15 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:dailyrpg/models/contract.dart';
 import 'package:http/http.dart' as http;
 import '../models/hunter_user.dart';
 
 class ApiService{
-  final String _baseUrl= "http://10.0.2.2:5164/api"; 
+  final String _baseUrl= "http://10.0.2.2:5164/api";
+  final Map<String, String> _headers ={
+    'Content-Type': 'application/json; charset=UTF-8'
+  } ;
 
   Future<HunterUser> fetchHunterStats() async {
     try {
@@ -60,7 +65,7 @@ class ApiService{
     }
   }
   Future<void> surrenderContract(String id) async {
-    final response = await http.get(Uri.parse('$_baseUrl/surrender/$id'));
+    final response = await http.post(Uri.parse('$_baseUrl/ContractsControllers/abandon/$id'));
 
     if (response.statusCode == 200 || response.statusCode == 204){
       return;
@@ -68,6 +73,20 @@ class ApiService{
       print('ERRO NA API [CONTROLLER]: Status Code = ${response.statusCode}');
       print('ERRO NA API [CONTROLLER]: Body = ${response.body}');
     }
-    
+  }
+
+  Future<void> createContract(Map<String, dynamic> contractData) async{
+    try{
+      final response =  await http.post(Uri.parse('$_baseUrl/ContractsControllers'),headers: _headers, body: jsonEncode(contractData));
+      if (response.statusCode == 200 || response.statusCode == 202){
+      return;
+      }
+    else{
+      print('ERRO NA API [CREATE]: Status = ${response.statusCode}');
+      print('ERRO NA API [CREATE]: Body = ${response.body}');
+    }
+    }catch (e){
+    print ('Exceção [CREATE]: $e');
+    } 
   }
 }

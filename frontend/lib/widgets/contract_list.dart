@@ -9,10 +9,10 @@ class ContractList extends StatefulWidget {
   const ContractList({super.key, required this.onDataChanged});
 
   @override
-  State<ContractList> createState() => _ContractListState();
+  State<ContractList> createState() => ContractListState();
 }
 
-class _ContractListState extends State<ContractList> {
+class ContractListState extends State<ContractList> {
   final ApiService _apiService = ApiService();
   late Future<List<Contract>> _contractsFuture;
 
@@ -20,6 +20,12 @@ class _ContractListState extends State<ContractList> {
   void initState() {
     super.initState();
     _contractsFuture = _apiService.fetchContracts();
+  }
+
+  void refreshContracts(){
+    setState(() {
+    _contractsFuture = _apiService.fetchContracts();
+    });
   }
 
   void _completeContract(String id) async {

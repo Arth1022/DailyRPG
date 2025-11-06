@@ -1,5 +1,6 @@
  // lib/main.dart
 
+import 'package:dailyrpg/screens/add_contract_screen.dart';
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'models/hunter_user.dart';
@@ -39,11 +40,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  void _refreshHunterStats() {
+  
+ 
+ void _refreshHunterStats() {
     setState(() {
       _hunterStatsFuture = _apiService.fetchHunterStats();
     });
   }
+  final _contractListKey = GlobalKey<ContractListState>();
+
   late Future<HunterUser> _hunterStatsFuture;
   final ApiService _apiService = ApiService();
 
@@ -53,9 +58,27 @@ class _HomeScreenState extends State<HomeScreen> {
     _hunterStatsFuture = _apiService.fetchHunterStats();
   }
 
+  Future<void> _navigateAndRefresh(BuildContext content) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddContractScreen())
+    );
+    if (result == true){
+      _refreshHunterStats();
+      _contractListKey.currentState?.refreshContracts();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateAndRefresh(context),
+        child: const Icon(Icons.add
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: FutureBuilder<HunterUser>(
         future: _hunterStatsFuture,
         builder: (context, snapshot) {
@@ -159,7 +182,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // --- A LISTA DE TAREFAS ---
                     ContractList(
+                      key: _contractListKey,
                       onDataChanged: _refreshHunterStats,
+
                     ),
 
                   ],
