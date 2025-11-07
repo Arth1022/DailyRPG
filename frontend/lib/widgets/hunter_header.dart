@@ -77,14 +77,14 @@ class HunterHeader extends StatelessWidget {
                 SizedBox(width: 40,),
                 const Icon(
                   Icons.monetization_on,
-                  color: Colors.yellow,
+                  color: Colors.amber,
                   size: 20,
                 ),
                 Text(
                   ' ${hunter.currentCoins}G',
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Colors.yellow,
+                    color: Colors.amber,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

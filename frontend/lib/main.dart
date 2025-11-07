@@ -48,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late Future<HunterUser> _hunterStatsFuture;
   final ApiService _apiService = ApiService();
+  late HunterUser _cachedHunter;
 
   @override
   void initState() {
@@ -69,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToShop(BuildContext context) async {
     final result = await Navigator.push(
         context, 
-        MaterialPageRoute(builder: (context) => const ShopScreen())
+        MaterialPageRoute(builder: (context) => ShopScreen(hunter: _cachedHunter,onPurchaseSuccess: _refreshHunterStats))
     );
     if (result == true) {
       _refreshHunterStats();
@@ -83,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icons.menu,
         activeIcon: Icons.close,
         direction: SpeedDialDirection.up,
-        backgroundColor: Colors.red[800],
+        backgroundColor: const Color.fromARGB(255, 43, 9, 194),
         children: [
           SpeedDialChild(
             child: const Icon(Icons.shopping_basket_outlined),
@@ -117,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           if (snapshot.hasData) {
+            _cachedHunter = snapshot.data!;
             final hunter = snapshot.data!;
 
             return SafeArea(

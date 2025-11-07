@@ -54,6 +54,9 @@ class ContractListState extends State<ContractList> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Deu ruim chefe")));
     }
+    //Widget _iconFilter(String status){
+    //  if (Contract. == )
+    //}
   }
 
   @override
@@ -92,6 +95,11 @@ class ContractListState extends State<ContractList> {
                     child: ExpansionTile(
                       title: Row(
                         children: [
+                          const Icon(
+                            Icons.sports_gymnastics
+                          ),
+                          SizedBox(width: 16,),
+
                           Expanded(
                             child: Text(
                               contract.title,

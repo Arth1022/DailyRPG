@@ -89,4 +89,22 @@ class ApiService{
     print ('Exceção [CREATE]: $e');
     } 
   }
+  Future<void> buyItem(String id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/ShopControllers/buy/$id'),
+      );
+      
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      } else {
+        print('ERRO NA API [SHOP]: StatusCode = ${response.statusCode}');
+        print('ERRO NA API [SHOP]: Body = ${response.body}');
+        throw Exception('Falha ao comprar (Code: ${response.statusCode})');
+      }
+    } catch (e) {
+      print('EXEÇÃO [Shop]: $e');
+      throw Exception('Erro: $e');
+    }
+  }
 }
