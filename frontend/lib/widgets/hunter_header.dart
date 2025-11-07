@@ -63,7 +63,7 @@ class HunterHeader extends StatelessWidget {
                 const Icon(
                   Icons.shield_moon,
                   color: Color.fromARGB(255, 11, 223, 21),
-                  size: 20.0,
+                  size: 25.0,
                 ),
                 const SizedBox(width: 8.0),
                 Text(

@@ -123,12 +123,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
             return SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 15,),
                     HunterHeader(hunter: hunter),
-                    const SizedBox(height: 20.0),
+                    const SizedBox(height: 20),
                     ContractList(
                       key: _contractListKey,
                       onDataChanged: _refreshHunterStats,

@@ -68,11 +68,16 @@ class _AddContractScreenState extends State<AddContractScreen> {
   @override
   Widget build(BuildContext context){
     return Scaffold(
-      body: _isLoading 
+      appBar: AppBar(
+        title: const Text(''),
+      ),
+      body:
+       _isLoading 
             ?const Center(child: CircularProgressIndicator(),)
             : Form(
               key: _formKey,
-              child: ListView(
+              child:
+               ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
                   TextFormField(

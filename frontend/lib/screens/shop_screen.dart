@@ -99,7 +99,7 @@ class _ShopScreenState extends State<ShopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Loja'),
+        title: const Text(''),
       ),
       body: Column(
         children: [
