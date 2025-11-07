@@ -48,8 +48,12 @@ namespace DailyRpg.ShopControllers
                     {
                         return BadRequest(new { Message = "Dinheiro Insuficinete" });
                     }
-                    hunter.CurrentCoins -= ItemCost;
-                    hunter.HealingPotions++;
+                    else
+                    {
+                        hunter.CurrentCoins -= ItemCost;
+                        hunter.HealingPotions++;
+                    }
+                    
                     break;
 
                 case "xpdoubler":
@@ -58,8 +62,12 @@ namespace DailyRpg.ShopControllers
                     {
                         BadRequest(new { Messsage = "Dinheiro Insufuciente" });
                     }
-                    hunter.CurrentCoins -= ItemCost;
-                    hunter.XpPotions++;
+                    else
+                    {
+                        hunter.CurrentCoins -= ItemCost;
+                        hunter.XpPotions++;
+                    }
+                    
                     break;
                 default:
                     return NotFound(new { Message = "Item não esta disponível na loja" });

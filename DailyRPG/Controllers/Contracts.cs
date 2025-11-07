@@ -47,7 +47,6 @@ namespace DailyRpg.Controllers
                     contract.IsCompleted = true;
                     hasFailed = true;
                 }
-
                 await _context.SaveChangesAsync();
             }
 
@@ -112,6 +111,7 @@ namespace DailyRpg.Controllers
                 hunter.CurrentXp -= hunter.NextLevelXp; //zera e deixa o restante 
                 hunter.CurrentHp = 100; //vida maxima!
             }
+            hunter.CurrentCoins = contract.CoinReward;
 
             await _context.SaveChangesAsync();
 
@@ -132,48 +132,26 @@ namespace DailyRpg.Controllers
         [HttpPost("abandon/{id}")]
         public async Task<IActionResult> AbandonContract(int id)
         {
-            // 1. Encontra o Contrato que queremos abandonar
-            // (Presume que a sua tabela se chama "Contracts")
             var contract = await _context.Contracts.FindAsync(id);
 
             if (contract == null)
             {
-                // Se o contrato não existir, retorna um erro 404
                 return NotFound(new { message = "Contrato não encontrado." });
             }
-
-            // 2. Encontra o Caçador (Hunter)
-            // (Isto presume um jogo single-player,
-            // onde apenas pegamos o primeiro caçador.
-            // Se você tiver múltiplos utilizadores, terá de o encontrar pelo ID)
             var hunter = await _context.StatsUser.FirstOrDefaultAsync();
 
             if (hunter == null)
             {
-                // Isto não deve acontecer, mas é uma boa verificação
                 return BadRequest(new { message = "Caçador não encontrado." });
             }
-
-            // 3. A LÓGICA DO JOGO (A Penalidade!)
-            // Você pode definir o valor da penalidade aqui
             int hpPenalty = 10;
             hunter.CurrentHp -= hpPenalty;
-
-            // 4. Segurança: Impede a vida de ficar negativa
             if (hunter.CurrentHp < 0)
             {
                 hunter.CurrentHp = 0;
             }
-
-            // 5. Remove o contrato
             _context.Contracts.Remove(contract);
 
-            // 6. Salva AMBAS as mudanças no Banco de Dados
-            // (A vida do Caçador E a remoção do Contrato)
-            await _context.SaveChangesAsync();
-
-            // 7. Retorna Sucesso
-            // (Enviamos uma mensagem que o Flutter pode (ou não) usar)
             return Ok(new
             {
                 message = "Contrato abandonado com sucesso.",
