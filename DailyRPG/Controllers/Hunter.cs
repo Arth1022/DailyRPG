@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DailyRpg.Data;
 using DailyRpg.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DailyRpg.HunterControllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class HunterControllers : ControllerBase
     {
         private readonly ApiDbContext _context;

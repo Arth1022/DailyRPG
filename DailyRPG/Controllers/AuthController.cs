@@ -4,6 +4,10 @@ using DailyRpg.Data;
 using DailyRpg.Models;
 using DailyRpg.DTOs;
 using BCrypt.Net;
+using System.Security.Claims; 
+using System.IdentityModel.Tokens.Jwt; 
+using Microsoft.IdentityModel.Tokens; 
+using System.Text;
 
 namespace DailyRpg.Controllers
 {
@@ -13,10 +17,42 @@ namespace DailyRpg.Controllers
     {
         private readonly ApiDbContext _context; // Ligacao com o DB
 
-        public AuthController(ApiDbContext context)
+        private readonly IConfiguration _configuration;
+
+        public AuthController(ApiDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
+        private string CreateToken(User user)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName)
+        
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            _configuration.GetSection("Jwt:Key").Value!
+        ));
+
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.Now.AddDays(1),
+            SigningCredentials = creds,
+            Issuer = _configuration.GetSection("Jwt:Issuer").Value!,
+            Audience = _configuration.GetSection("Jwt:Audience").Value!
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+        
+        return tokenHandler.WriteToken(token);
+    }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserRegisterDto request)
@@ -68,7 +104,9 @@ namespace DailyRpg.Controllers
                 return Unauthorized("Credenciais inválidas.");
             }
 
-            return Ok("Login bem-sucedido!");
+            string token = CreateToken(user);
+
+            return Ok(new { token = token });
         }
 
     }

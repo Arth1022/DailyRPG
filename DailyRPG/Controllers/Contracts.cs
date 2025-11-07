@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DailyRpg.Data;
 using DailyRpg.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DailyRpg.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ContractsControllers : ControllerBase
     {
         private readonly ApiDbContext _context;

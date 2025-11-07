@@ -3,11 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using DailyRpg.Data;
 using DailyRpg.Models;
 using System.Collections.Generic; // listas
+using Microsoft.AspNetCore.Authorization;
 
 namespace DailyRpg.ShopControllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
 
     public class ShopControllers : ControllerBase
     {
