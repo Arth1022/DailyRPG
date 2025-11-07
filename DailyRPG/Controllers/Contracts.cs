@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DailyRpg.Data;
 using DailyRpg.Models;
+
 namespace DailyRpg.Controllers
 {
     [ApiController]

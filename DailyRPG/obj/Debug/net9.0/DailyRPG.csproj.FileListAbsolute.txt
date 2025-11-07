@@ -264,3 +264,4 @@ C:\Users\Arthur\OneDrive\Documents\GitHub\Nova pasta\DailyRPGbackend\DailyRPG\ob
 C:\Users\Arthur\OneDrive\Documents\GitHub\Nova pasta\DailyRPGbackend\DailyRPG\obj\Debug\net9.0\DailyRPG.pdb
 C:\Users\Arthur\OneDrive\Documents\GitHub\Nova pasta\DailyRPGbackend\DailyRPG\obj\Debug\net9.0\DailyRPG.genruntimeconfig.cache
 C:\Users\Arthur\OneDrive\Documents\GitHub\Nova pasta\DailyRPGbackend\DailyRPG\obj\Debug\net9.0\ref\DailyRPG.dll
+C:\Users\Arthur\OneDrive\Documents\GitHub\Nova pasta\DailyRPGbackend\DailyRPG\bin\Debug\net9.0\BCrypt.Net-Next.dll
