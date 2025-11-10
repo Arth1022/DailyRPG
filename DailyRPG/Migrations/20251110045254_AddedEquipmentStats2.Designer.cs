@@ -4,6 +4,7 @@ using DailyRpg.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DailyRPG.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251110045254_AddedEquipmentStats2")]
+    partial class AddedEquipmentStats2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,10 +84,7 @@ namespace DailyRPG.Migrations
                     b.Property<int>("Defense")
                         .HasColumnType("int");
 
-                    b.Property<int?>("EquippedArmorslotId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("EquippedWeaponSlotId")
+                    b.Property<int>("HealingPotions")
                         .HasColumnType("int");
 
                     b.Property<string>("HunterName")
@@ -105,6 +105,9 @@ namespace DailyRPG.Migrations
 
                     b.Property<bool>("XpDouble")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("XpPotions")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

@@ -6,6 +6,16 @@ namespace DailyRpg.Models
     {
         Consumable,
         Equipament,
+        Material,
+        Xp
+
+    }
+
+    public enum EquipmentType
+    {
+        None,
+        Weapon,
+        Armor,
         Material
     }
 
@@ -22,9 +32,12 @@ namespace DailyRpg.Models
         [Required]
         public ItemType Type { get; set; }
 
+        public EquipmentType EquipType { get; set; } = EquipmentType.None;
+
         public int EffectValue { get; set; } = 0;
 
         [Required]
         public int ShopPrice { get; set; }
+
     }
 }

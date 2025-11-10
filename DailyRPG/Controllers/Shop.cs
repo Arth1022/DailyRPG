@@ -1,81 +1,108 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using DailyRpg.Data;
 using DailyRpg.Models;
-using System.Collections.Generic; // listas
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore; 
+using System.Security.Claims;
 
-namespace DailyRpg.ShopControllers
+namespace DailyRpg.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-
     public class ShopControllers : ControllerBase
     {
-        private static readonly List<object> ShopItems = new List<object>
-        {
-            new {ItemId = "Heal", Name = "Poção de cura", Cost = 100, description = "Restaura todo o HP" },
-            new {ItemId = "XPDouble", Name = "Poção de XP", Cost = 170, description = "Dobra o XP"}
-        };
-
         private readonly ApiDbContext _context;
 
         public ShopControllers(ApiDbContext context)
         {
             _context = context;
         }
-        [HttpGet("items")]
-        public IActionResult GetShopitems()
-        {
-            return Ok(ShopItems);
-        }
 
         [HttpPost("buy/{itemId}")]
-        public async Task<IActionResult> BuyItem(string itemId)
+        public async Task<IActionResult> BuyItem(int itemId)
         {
-            var hunter = await _context.StatsUser.FirstOrDefaultAsync();
-            if (hunter == null)
+            try
             {
-                NotFound(new { Message = "User não encontrado" });
-            }
-            //Logica de comprar
-            int ItemCost = 0;
+                (var hunterId, var error) = _getUserClaims();
+                if (error != null) return error;
 
-            switch (itemId.ToLower())
+                var hunter = await _context.StatsUser.FindAsync(hunterId);
+                if (hunter == null)
+                {
+                    return NotFound("Caçador não encontrado.");
+                }
+
+                var itemToBuy = await _context.Items.FindAsync(itemId);
+                if (itemToBuy == null)
+                {
+                    return NotFound("Item não encontrado na loja.");
+                }
+
+                if (hunter.CurrentCoins < itemToBuy.ShopPrice)
+                {
+                    return BadRequest("Ouro insuficiente.");
+                }
+
+                hunter.CurrentCoins -= itemToBuy.ShopPrice;
+
+
+                var inventorySlot = await _context.InventorySlots
+                    .FirstOrDefaultAsync(s => 
+                        s.HunterUserId == hunterId && 
+                        s.ItemId == itemId
+                    );
+
+                if (inventorySlot != null)
+                {
+                    inventorySlot.Quantity++;
+                }
+                else
+                {
+                    var newSlot = new InventorySlot
+                    {
+                        HunterUserId = hunterId.Value,
+                        ItemId = itemId,
+                        Quantity = 1 
+                    };
+      
+                    await _context.InventorySlots.AddAsync(newSlot);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { 
+                    message = $"{itemToBuy.Name} comprado com sucesso!", 
+                    newCoinTotal = hunter.CurrentCoins 
+                });
+            }
+            catch (Exception ex)
             {
-                case "heal":
-                    ItemCost = 100;
-                    if (hunter.CurrentCoins < ItemCost)
-                    {
-                        return BadRequest(new { Message = "Dinheiro Insuficinete" });
-                    }
-                    else
-                    {
-                        hunter.CurrentCoins -= ItemCost;
-                        hunter.HealingPotions++;
-                    }
-                    
-                    break;
-
-                case "xpdoubler":
-                    ItemCost = 150;
-                    if (hunter.CurrentCoins < ItemCost)
-                    {
-                        BadRequest(new { Messsage = "Dinheiro Insufuciente" });
-                    }
-                    else
-                    {
-                        hunter.CurrentCoins -= ItemCost;
-                        hunter.XpPotions++;
-                    }
-                    
-                    break;
-                default:
-                    return NotFound(new { Message = "Item não esta disponível na loja" });
+                return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
             }
-            await _context.SaveChangesAsync();
-            return Ok(hunter);
+        }
+
+
+        private (int? hunterId, IActionResult? error) _getUserClaims()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity == null)
+            {
+                return (null, Unauthorized("Token inválido (sem identidade)"));
+            }
+
+            var userClaim = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            if (userClaim == null)
+            {
+                return (null, Unauthorized("Token inválido (sem 'claim' de ID)"));
+            }
+
+            if (!int.TryParse(userClaim.Value, out int userId))
+            {
+                return (null, BadRequest("Token inválido (formato de ID)"));
+            }
+
+            return (userId, null);
         }
     }
 }
