@@ -3,7 +3,7 @@ using DailyRpg.Models;
 
 namespace DailyRpg.Data
 {
-    public class ApiDbContext : DbContext//Db context vem do padrao do EF
+    public class ApiDbContext : DbContext
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -15,10 +15,12 @@ namespace DailyRpg.Data
         public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
         {
         }
-        //tabelas  
-        //Classe    //nome da tabela
         public DbSet<Contract> Contracts { get; set; }
         public DbSet<HunterUser> StatsUser { get; set; }
         public DbSet<User> Users { get; set; }
+
+        public DbSet<Item> Items { get; set; } = null!;
+
+        public DbSet<InventorySlot> InventorySlots { get; set; } = null!;
      } 
 }
