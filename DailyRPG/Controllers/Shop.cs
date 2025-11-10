@@ -19,6 +19,20 @@ namespace DailyRpg.Controllers
             _context = context;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetShopItems()
+        {
+            try
+            {
+                var items = await _context.Items.ToListAsync();
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
+            }
+        }
+
         [HttpPost("buy/{itemId}")]
         public async Task<IActionResult> BuyItem(int itemId)
         {

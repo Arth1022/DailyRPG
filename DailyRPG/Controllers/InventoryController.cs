@@ -54,77 +54,93 @@ namespace DailyRpg.Controllers
                     return NotFound("Caçador não encontrado.");
                 }
 
-                var InventorySlot = await _context.InventorySlots.Include(c => c.Item).FirstOrDefaultAsync(s => s.Id == slotId && s.HunterUserId == hunterId);
-                if (InventorySlot == null)
+                var inventorySlot = await _context.InventorySlots
+                    .Include(s => s.Item) 
+                    .FirstOrDefaultAsync(s => 
+                        s.Id == slotId && 
+                        s.HunterUserId == hunterId
+                    );
+
+                if (inventorySlot == null)
                 {
-                    return NotFound("Item não encontrado no seu inventário");
+                    return NotFound("Item não encontrado no seu inventário.");
                 }
 
-                var item = InventorySlot.Item;
+                var item = inventorySlot.Item;
+                string message = "";
 
-                string message = ""; //message para o flutter (=
 
                 if (item.Type == ItemType.Consumable)
                 {
                     hunter.CurrentHp += item.EffectValue;
-
                     if (hunter.CurrentHp > hunter.MaxHp)
                     {
                         hunter.CurrentHp = hunter.MaxHp;
                     }
-                    message = $"Voce usou {item.Name} e restaurou {item.EffectValue} HP ";
-                }
-                else if (item.Type == ItemType.Xp)
-                {
-                    if (hunter.XpDouble == true)
-                    {
-                        BadRequest(new { Message = "Voce ja possui dobro de xp" });
-                    }
-                    else
-                    {
-                        hunter.XpDouble = true;
-                        message = "Voce usou dobro de Xp";
-                    }
+                    message = $"Você usou {item.Name} e restaurou {item.EffectValue} HP.";
 
 
+                    inventorySlot.Quantity--;
+                    if (inventorySlot.Quantity <= 0)
+                    {
+                        _context.InventorySlots.Remove(inventorySlot);
+                    }
                 }
+
                 else if (item.Type == ItemType.Equipament)
                 {
                     if (item.EquipType == EquipmentType.Weapon)
                     {
-                        hunter.Damage = item.EffectValue;
-                        message = $"Você equipou {item.Name} (Dano: {item.EffectValue}).";
-
+                        // É uma Arma
+                        if (hunter.EquippedWeaponSlotId == slotId)
+                        {
+                            
+                            hunter.Damage = 1; 
+                            hunter.EquippedWeaponSlotId = null; 
+                            message = $"Você desequipou {item.Name}.";
+                        }
+                        else
+                        {
+                 
+                            hunter.Damage = item.EffectValue;
+                            hunter.EquippedWeaponSlotId = slotId;
+                            message = $"Você equipou {item.Name} (Dano: {item.EffectValue}).";
+                        }
                     }
                     else if (item.EquipType == EquipmentType.Armor)
                     {
-                        hunter.Defense = item.EffectValue;
-                        message = $"Você equipou {item.Name} (Defesa: {item.EffectValue}).";
+                 
+                        if (hunter.EquippedArmorslotId  == slotId)
+                        {
+
+                            hunter.Defense = 0; 
+                            hunter.EquippedArmorslotId = null;
+                            message = $"Você desequipou {item.Name}.";
+                        }
+                        else
+                        {
+                   
+                            hunter.Defense = item.EffectValue;
+                            hunter.EquippedArmorslotId  = slotId;
+                            message = $"Você equipou {item.Name} (Defesa: {item.EffectValue}).";
+                        }
                     }
                 }
                 else
                 {
-                    return BadRequest($"{item.Name} não pode ser usado ou equipado.");
+                    return BadRequest($"{item.Name} não pode ser usado.");
                 }
 
-                if (item.Type == ItemType.Consumable)
-                {
-                    InventorySlot.Quantity--;
-                }
-                if (item.Type == ItemType.Consumable && InventorySlot.Quantity <= 0)
-                {
-                    _context.InventorySlots.Remove(InventorySlot);
-                }
-
+                // Passo 5: Salvar TUDO
                 await _context.SaveChangesAsync();
 
                 return Ok(new { message = message });
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                return StatusCode(500, $"Erro no servidor : {ex.Message}");
+                return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
             }
         }
-
         private (int? hunterId, IActionResult? error) _getUserClaims()
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity; 
