@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'services/api_service.dart';
 import 'models/hunter_user.dart';
+import 'screens/login_screen.dart';
 
 //widgets
 import 'widgets/contract_list.dart';
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         primarySwatch: Colors.red,
       ),
-      home: const HomeScreen(),
+      home: const LoginScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -127,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 15,),
+                    const SizedBox(height: 5,),
                     HunterHeader(hunter: hunter),
                     const SizedBox(height: 20),
                     ContractList(

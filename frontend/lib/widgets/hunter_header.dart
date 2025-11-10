@@ -24,6 +24,18 @@ class HunterHeader extends StatelessWidget {
         children: [
           Row(
             children: [
+              Text(
+                "${hunter.hunterName}",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold
+                ),
+              )
+            ],
+          ),
+          SizedBox(height: 6.5,),
+          Row(
+            children: [
               const Icon(
                 Icons.favorite,
                 color: Color(0xFFE53935),
@@ -88,6 +100,9 @@ class HunterHeader extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                SizedBox(width: 10,),
+
+                //Butão inventario
               ],
             ),
           ),
