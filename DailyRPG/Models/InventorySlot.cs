@@ -1,0 +1,26 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace DailyRpg.Models
+{
+    public class InventorySlot
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public int HunterUserId { get; set; }
+
+        [ForeignKey("HunterUserId")]
+        public virtual HunterUser HunterUser { get; set; } = null!;
+
+        [Required]
+        public int ItemId { get; set; }
+
+        [ForeignKey("ItemId")]
+        public virtual Item Item { get; set; } = null!;
+
+        [Required]
+        public int Quantity { get; set; }
+    }
+}
