@@ -1,8 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using DailyRpg.Data;
 using DailyRpg.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DailyRpg.Controllers
 {
@@ -13,28 +14,48 @@ namespace DailyRpg.Controllers
     {
         private readonly ApiDbContext _context;
 
+        private static readonly Random _random = new Random();
+
         public ContractsControllers(ApiDbContext context)
         {
             _context = context;
         }
 
-        //End_Points
-
+   
         [HttpPost]
-        public async Task<IActionResult> CreateContract([FromBody] Contract newContract)
+        public async Task<IActionResult> CreateContract([FromBody] CreateContractDto contractDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                (var hunterId, var error) = _getUserClaims();
+                if (error != null) return error;
+
+                var newContract = new Contract
+                {
+                    Id = 0,
+                    Title = contractDto.Title,
+                    Descricao = contractDto.Descricao,
+                    Difficult = contractDto.Difficult,
+                    XpReward = contractDto.XpReward,
+                    CoinReward = contractDto.CoinReward,
+                    StartDate = DateTime.UtcNow,
+
+                    IsCompleted = false,
+                    HunterUserId = hunterId.Value
+                };
+
+                await _context.Contracts.AddAsync(newContract);
+                await _context.SaveChangesAsync();
+                
+                return Ok(newContract); 
             }
-            await _context.Contracts.AddAsync(newContract);
-
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetContractById), new { id = newContract.Id }, newContract); //Retorna qual objeto foi criado
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno: {ex.Message}");
+            }
         }
 
-        [HttpGet("fail")] // /api/contracts/active
+        [HttpGet("fail")]
         public async Task<IActionResult> GetActiveContracts()
         {
             //Logica de Falha
@@ -74,53 +95,136 @@ namespace DailyRpg.Controllers
         [HttpPut("{id}/complete")]
         public async Task<IActionResult> CompleteContract(int id)
         {
-            var contract = await _context.Contracts.FindAsync(id);
-            if (contract == null)
+            try
             {
-                return NotFound(new { Message = "Contrato não encontrado." });
+                (var hunterId, var error) = _getUserClaims();
+                if (error != null) return error;
+
+                var hunter = await _context.StatsUser.FindAsync(hunterId);
+                var contract = await _context.Contracts.FirstOrDefaultAsync(c => c.Id == id && c.HunterUserId == hunterId);
+
+                if (contract == null || hunter == null)
+                {
+                    return NotFound(new { Message = "Contrato ou jogador não encontrado." });
+                }
+                if (contract.IsCompleted)
+                {
+                    return BadRequest(new { Message = "Contrato ja foi completo" });
+                }
+
+
+
+                contract.IsCompleted = true;
+
+
+                int bonus = 1;
+                if (contract.Difficult == "Normal") { bonus = 2; }
+                else if (contract.Difficult == "Hard") { bonus = 3; }
+
+
+                if (hunter.XpDouble == true)
+                {
+                    hunter.CurrentXp = hunter.CurrentXp + (contract.XpReward * bonus * 2);
+                }
+                else
+                {
+                    hunter.CurrentXp = hunter.CurrentXp + (contract.XpReward * bonus);
+                }
+                hunter.XpDouble = false;
+
+
+                if (hunter.CurrentXp >= hunter.NextLevelXp)
+                {
+
+                    int xpNecessario = hunter.NextLevelXp;
+
+                    hunter.Level++; // Sobe o level
+                    hunter.NextLevelXp += 200; // Aumenta a qtd para o proximo nivel
+                    hunter.CurrentXp = hunter.CurrentXp - xpNecessario; // Zera e deixa o restante
+                    hunter.CurrentHp = 100; // (Vida maxima)
+                }
+
+
+                hunter.CurrentCoins += contract.CoinReward;
+
+
+
+                string dropMessage = "";
+                int dropChance = 50;
+
+                // "logica de DROP"
+                if (_random.Next(100) < dropChance)
+                {
+
+                    var materialDrops = await _context.Items
+                        .Where(i => i.Type == ItemType.Material)
+                        .ToListAsync();
+
+                    if (materialDrops.Any())
+                    {
+                        var itemToDrop = materialDrops[_random.Next(materialDrops.Count)];
+
+                        var inventorySlot = await _context.InventorySlots
+                            .FirstOrDefaultAsync(s =>
+                                s.HunterUserId == hunterId &&
+                                s.ItemId == itemToDrop.Id
+                            );
+
+                        if (inventorySlot != null)
+                        {
+                            inventorySlot.Quantity++;
+                        }
+                        else
+                        {
+                            var newSlot = new InventorySlot
+                            {
+                                HunterUserId = hunterId.Value,
+                                ItemId = itemToDrop.Id,
+                                Quantity = 1
+                            };
+                            await _context.InventorySlots.AddAsync(newSlot);
+                        }
+
+                        dropMessage = $" Você também obteve 1x {itemToDrop.Name}!";
+                    }
+                }
+
+
+                await _context.SaveChangesAsync();
+
+
+                return Ok(new
+                {
+                    message = $"Contrato concluído!{dropMessage}",
+                    updatedHunter = hunter
+                });
             }
-            if (contract.IsCompleted)
+            catch (Exception ex)
             {
-                return BadRequest(new { Message = "Contrato ja foi completo" });
+                return StatusCode(500, $"Erro interno: {ex.Message}");
             }
-
-            var hunter = await _context.StatsUser.FirstOrDefaultAsync();
-            if (hunter == null)
-            {
-                return NotFound(new { Message = "User não foi encontrado." });
-            }
-            //Logica do jogo
-
-            contract.IsCompleted = true;
-            int bonus = 1;
-            if (contract.Difficult == "Normal") { bonus = 2; }
-
-            else if (contract.Difficult == "Hard") { bonus = 3; }
-
-            if (hunter.XpDouble == true)
-            {
-                hunter.CurrentXp = hunter.CurrentXp + (contract.XpReward * bonus * 2);
-            }
-            else
-            {
-                hunter.CurrentXp = hunter.CurrentXp + (contract.XpReward * bonus);
-            }
-            hunter.XpDouble = false;
-
-            if (hunter.CurrentXp >= hunter.NextLevelXp)
-            {
-                hunter.Level++; //Sobe o level
-                hunter.NextLevelXp += 200; //Aumenta a qtd para o proximo nivel
-                hunter.CurrentXp -= hunter.NextLevelXp; //zera e deixa o restante 
-                hunter.CurrentHp = 100; //vida maxima!
-            }
-            hunter.CurrentCoins = contract.CoinReward;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(hunter);
-
         }
+        private (int? hunterId, IActionResult? error) _getUserClaims()
+    {
+        var identity = HttpContext.User.Identity as ClaimsIdentity;
+        if (identity == null) 
+        {
+            return (null, Unauthorized("Token inválido"));
+        }
+        
+        var userClaim = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userClaim == null) 
+        {
+            return (null, Unauthorized("Token inválido (sem claim)"));
+        }
+
+        if (!int.TryParse(userClaim.Value, out int userId)) 
+        {
+            return (null, BadRequest("Token inválido (formato de ID)"));
+        }
+        
+        return (userId, null);
+    }
 
         [HttpGet("undone")]
         public async Task<IActionResult> UndoneContracts()

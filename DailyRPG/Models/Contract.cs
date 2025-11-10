@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DailyRpg.Models
 {
     public class Contract
@@ -10,5 +13,11 @@ namespace DailyRpg.Models
         public DateTime StartDate { get; set; }
         public required bool IsCompleted { get; set; } = false;
         public required string Difficult { get; set; } = "Easy";
+
+        [Required]
+        public int HunterUserId { get; set; }
+        
+        [ForeignKey("HunterUserId")]
+        public virtual HunterUser HunterUser { get; set; } = null!;
     }
 }
