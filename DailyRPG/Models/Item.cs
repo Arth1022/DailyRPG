@@ -39,5 +39,7 @@ namespace DailyRpg.Models
         [Required]
         public int ShopPrice { get; set; }
 
+        public string SkillAffinity { get; set; } = "None";
+
     }
 }

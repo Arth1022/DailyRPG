@@ -10,9 +10,26 @@ namespace DailyRpg.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<User>().HasOne(u => u.HunterUser).WithOne().HasForeignKey<HunterUser>(h => h.UserId);
+            modelBuilder.Entity<InventorySlot>()
+                .HasOne(s => s.HunterUser) 
+                .WithMany() 
+                .HasForeignKey(s => s.HunterUserId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
+
+            modelBuilder.Entity<HunterUser>()
+                .HasOne(h => h.EquippedWeaponSlot) 
+                .WithMany() 
+                .HasForeignKey(h => h.EquippedWeaponSlotId) 
+                .OnDelete(DeleteBehavior.SetNull);
+
+
+            modelBuilder.Entity<HunterUser>()
+                .HasOne(h => h.EquippedArmorSlot) 
+                .WithMany()
+                .HasForeignKey(h => h.EquippedArmorSlotId) 
+                .OnDelete(DeleteBehavior.SetNull); 
         }
-        //construtor padrao:
         public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
         {
         }
@@ -26,6 +43,10 @@ namespace DailyRpg.Data
 
         public DbSet<Recipe> Recipes { get; set; } = null!;
         public DbSet<RecipeIngredient> RecipeIngredients { get; set; } = null!;
+
+        public DbSet<Boss> Bosses { get; set; } = null!;
+
+        
         
      } 
 }

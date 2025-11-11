@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DailyRPG.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20251110062034_DropSystem")]
-    partial class DropSystem
+    [Migration("20251111030859_AddedNavigationProperties")]
+    partial class AddedNavigationProperties
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,38 @@ namespace DailyRPG.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("DailyRpg.Models.Boss", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaxHp")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("NextBossId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RewardCoin")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RewardXp")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Bosses");
+                });
 
             modelBuilder.Entity("DailyRpg.Models.Contract", b =>
                 {
@@ -74,6 +106,18 @@ namespace DailyRPG.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AttributePoints")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Constitution")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentBossHp")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CurrentBossId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CurrentCoins")
                         .HasColumnType("int");
 
@@ -89,7 +133,13 @@ namespace DailyRPG.Migrations
                     b.Property<int>("Defense")
                         .HasColumnType("int");
 
-                    b.Property<int?>("EquippedArmorslotId")
+                    b.Property<int>("Dexterity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Endurance")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("EquippedArmorSlotId")
                         .HasColumnType("int");
 
                     b.Property<int?>("EquippedWeaponSlotId")
@@ -98,6 +148,9 @@ namespace DailyRPG.Migrations
                     b.Property<string>("HunterName")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<int>("Intelligence")
+                        .HasColumnType("int");
 
                     b.Property<int>("Level")
                         .HasColumnType("int");
@@ -108,6 +161,9 @@ namespace DailyRPG.Migrations
                     b.Property<int>("NextLevelXp")
                         .HasColumnType("int");
 
+                    b.Property<int>("Strength")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
@@ -115,6 +171,12 @@ namespace DailyRPG.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CurrentBossId");
+
+                    b.HasIndex("EquippedArmorSlotId");
+
+                    b.HasIndex("EquippedWeaponSlotId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -173,12 +235,68 @@ namespace DailyRPG.Migrations
                     b.Property<int>("ShopPrice")
                         .HasColumnType("int");
 
+                    b.Property<string>("SkillAffinity")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("DailyRpg.Models.Recipe", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("ItemCreatedId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemCreatedId");
+
+                    b.ToTable("Recipes");
+                });
+
+            modelBuilder.Entity("DailyRpg.Models.RecipeIngredient", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MaterialId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantityRequired")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.ToTable("RecipeIngredients");
                 });
 
             modelBuilder.Entity("DailyRpg.Models.User", b =>
@@ -215,11 +333,31 @@ namespace DailyRPG.Migrations
 
             modelBuilder.Entity("DailyRpg.Models.HunterUser", b =>
                 {
+                    b.HasOne("DailyRpg.Models.Boss", "CurrentBoss")
+                        .WithMany()
+                        .HasForeignKey("CurrentBossId");
+
+                    b.HasOne("DailyRpg.Models.InventorySlot", "EquippedArmorSlot")
+                        .WithMany()
+                        .HasForeignKey("EquippedArmorSlotId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("DailyRpg.Models.InventorySlot", "EquippedWeaponSlot")
+                        .WithMany()
+                        .HasForeignKey("EquippedWeaponSlotId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("DailyRpg.Models.User", null)
                         .WithOne("HunterUser")
                         .HasForeignKey("DailyRpg.Models.HunterUser", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CurrentBoss");
+
+                    b.Navigation("EquippedArmorSlot");
+
+                    b.Navigation("EquippedWeaponSlot");
                 });
 
             modelBuilder.Entity("DailyRpg.Models.InventorySlot", b =>
@@ -239,6 +377,41 @@ namespace DailyRPG.Migrations
                     b.Navigation("HunterUser");
 
                     b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("DailyRpg.Models.Recipe", b =>
+                {
+                    b.HasOne("DailyRpg.Models.Item", "ItemCreated")
+                        .WithMany()
+                        .HasForeignKey("ItemCreatedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ItemCreated");
+                });
+
+            modelBuilder.Entity("DailyRpg.Models.RecipeIngredient", b =>
+                {
+                    b.HasOne("DailyRpg.Models.Item", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DailyRpg.Models.Recipe", "Recipe")
+                        .WithMany("RecipeIngredients")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Material");
+
+                    b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("DailyRpg.Models.Recipe", b =>
+                {
+                    b.Navigation("RecipeIngredients");
                 });
 
             modelBuilder.Entity("DailyRpg.Models.User", b =>

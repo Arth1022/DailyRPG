@@ -100,9 +100,12 @@ namespace DailyRpg.Controllers
                 (var hunterId, var error) = _getUserClaims();
                 if (error != null) return error;
 
-                var hunter = await _context.StatsUser.FindAsync(hunterId);
+                var hunter = await _context.StatsUser
+                    .Include(h => h.CurrentBoss)
+                    .FirstOrDefaultAsync(h => h.Id == hunterId);
+                
                 var contract = await _context.Contracts.FirstOrDefaultAsync(c => c.Id == id && c.HunterUserId == hunterId);
-
+                        
                 if (contract == null || hunter == null)
                 {
                     return NotFound(new { Message = "Contrato ou jogador não encontrado." });
@@ -111,16 +114,12 @@ namespace DailyRpg.Controllers
                 {
                     return BadRequest(new { Message = "Contrato ja foi completo" });
                 }
-
-
-
+                
                 contract.IsCompleted = true;
-
-
+                
                 int bonus = 1;
                 if (contract.Difficult == "Normal") { bonus = 2; }
                 else if (contract.Difficult == "Hard") { bonus = 3; }
-
 
                 if (hunter.XpDouble == true)
                 {
@@ -132,32 +131,26 @@ namespace DailyRpg.Controllers
                 }
                 hunter.XpDouble = false;
 
-
                 if (hunter.CurrentXp >= hunter.NextLevelXp)
                 {
+                    int xpNecessario = hunter.NextLevelXp; 
+                    hunter.Level++; 
+                    hunter.NextLevelXp += 200; 
+                    hunter.CurrentXp = hunter.CurrentXp - xpNecessario;
+                    hunter.CurrentHp = 100;
 
-                    int xpNecessario = hunter.NextLevelXp;
-
-                    hunter.Level++; // Sobe o level
-                    hunter.NextLevelXp += 200; // Aumenta a qtd para o proximo nivel
-                    hunter.CurrentXp = hunter.CurrentXp - xpNecessario; // Zera e deixa o restante
-                    hunter.CurrentHp = 100; // (Vida maxima)
+                    hunter.AttributePoints += 1;
                 }
-
 
                 hunter.CurrentCoins += contract.CoinReward;
 
-
-
                 string dropMessage = "";
-                int dropChance = 50;
+                int dropChance = 50; 
 
-                // "logica de DROP"
                 if (_random.Next(100) < dropChance)
                 {
-
                     var materialDrops = await _context.Items
-                        .Where(i => i.Type == ItemType.Material)
+                        .Where(i => i.Type == ItemType.Material) 
                         .ToListAsync();
 
                     if (materialDrops.Any())
@@ -165,8 +158,8 @@ namespace DailyRpg.Controllers
                         var itemToDrop = materialDrops[_random.Next(materialDrops.Count)];
 
                         var inventorySlot = await _context.InventorySlots
-                            .FirstOrDefaultAsync(s =>
-                                s.HunterUserId == hunterId &&
+                            .FirstOrDefaultAsync(s => 
+                                s.HunterUserId == hunterId && 
                                 s.ItemId == itemToDrop.Id
                             );
 
@@ -184,19 +177,54 @@ namespace DailyRpg.Controllers
                             };
                             await _context.InventorySlots.AddAsync(newSlot);
                         }
-
+                        
                         dropMessage = $" Você também obteve 1x {itemToDrop.Name}!";
                     }
                 }
 
+                string bossMessage = "";
+
+                if (hunter.CurrentBossId != null && hunter.CurrentBoss != null)
+                {
+                    var bossTemplate = hunter.CurrentBoss;
+
+                    hunter.CurrentBossHp -= hunter.Damage;
+                    
+                    bossMessage = $" Você causou {hunter.Damage} de dano ao {bossTemplate.Name}!";
+
+                    if (hunter.CurrentBossHp <= 0)
+                    {
+                        bossMessage += $" (DERROTADO!)";
+                        
+                        hunter.CurrentXp += bossTemplate.RewardXp;
+                        hunter.CurrentCoins += bossTemplate.RewardCoin;
+
+                        if (bossTemplate.NextBossId != null)
+                        {
+                            var nextBoss = await _context.Bosses.FindAsync(bossTemplate.NextBossId);
+                            if (nextBoss != null)
+                            {
+                                hunter.CurrentBossId = nextBoss.Id;
+                                hunter.CurrentBossHp = nextBoss.MaxHp;
+                                bossMessage += $" O {nextBoss.Name} (Nv. {nextBoss.Level}) apareceu!";
+                            }
+                            else
+                            {
+                                hunter.CurrentBossId = null;
+                            }
+                        }
+                        else
+                        {
+                            hunter.CurrentBossId = null; 
+                        }
+                    }
+                } 
 
                 await _context.SaveChangesAsync();
 
-
-                return Ok(new
-                {
-                    message = $"Contrato concluído!{dropMessage}",
-                    updatedHunter = hunter
+                return Ok(new { 
+                    message = $"Contrato concluído!{dropMessage}{bossMessage}", 
+                    updatedHunter = hunter 
                 });
             }
             catch (Exception ex)
@@ -205,26 +233,26 @@ namespace DailyRpg.Controllers
             }
         }
         private (int? hunterId, IActionResult? error) _getUserClaims()
-    {
-        var identity = HttpContext.User.Identity as ClaimsIdentity;
-        if (identity == null) 
         {
-            return (null, Unauthorized("Token inválido"));
-        }
-        
-        var userClaim = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-        if (userClaim == null) 
-        {
-            return (null, Unauthorized("Token inválido (sem claim)"));
-        }
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity == null) 
+            {
+                return (null, Unauthorized("Token inválido"));
+            }
+            
+            var userClaim = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            if (userClaim == null) 
+            {
+                return (null, Unauthorized("Token inválido (sem claim)"));
+            }
 
-        if (!int.TryParse(userClaim.Value, out int userId)) 
-        {
-            return (null, BadRequest("Token inválido (formato de ID)"));
+            if (!int.TryParse(userClaim.Value, out int userId)) 
+            {
+                return (null, BadRequest("Token inválido (formato de ID)"));
+            }
+            
+            return (userId, null);
         }
-        
-        return (userId, null);
-    }
 
         [HttpGet("undone")]
         public async Task<IActionResult> UndoneContracts()

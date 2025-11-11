@@ -72,8 +72,22 @@ namespace DailyRpg.Controllers
                 MaxHp = 100,
                 CurrentXp = 0,
                 NextLevelXp = 700,
-                CurrentCoins = 0,
+                CurrentCoins = 20,
+                Damage = 1,
+                Defense = 0,
+
             };
+            var firstBoss = await _context.Bosses
+                    .FirstOrDefaultAsync(b => b.Level == 1);
+
+                if (firstBoss != null)
+                {
+                    
+                    newHunter.CurrentBossId = firstBoss.Id;
+                    newHunter.CurrentBossHp = firstBoss.MaxHp; 
+                }
+                
+                
 
             var newUser = new User
             {
