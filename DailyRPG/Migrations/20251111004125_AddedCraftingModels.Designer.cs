@@ -4,6 +4,7 @@ using DailyRpg.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DailyRPG.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251111004125_AddedCraftingModels")]
+    partial class AddedCraftingModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -190,6 +193,9 @@ namespace DailyRPG.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("ItemCreateId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ItemCreatedId")
                         .HasColumnType("int");
 
@@ -204,7 +210,28 @@ namespace DailyRPG.Migrations
                     b.ToTable("Recipes");
                 });
 
-            modelBuilder.Entity("DailyRpg.Models.RecipeIngredient", b =>
+            modelBuilder.Entity("DailyRpg.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Dailyrpg.Models.RecipeIngredient", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -227,28 +254,7 @@ namespace DailyRPG.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("RecipeIngredients");
-                });
-
-            modelBuilder.Entity("DailyRpg.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Users");
+                    b.ToTable("recipeIngredients");
                 });
 
             modelBuilder.Entity("DailyRpg.Models.Contract", b =>
@@ -301,7 +307,7 @@ namespace DailyRPG.Migrations
                     b.Navigation("ItemCreated");
                 });
 
-            modelBuilder.Entity("DailyRpg.Models.RecipeIngredient", b =>
+            modelBuilder.Entity("Dailyrpg.Models.RecipeIngredient", b =>
                 {
                     b.HasOne("DailyRpg.Models.Item", "Material")
                         .WithMany()
@@ -310,7 +316,7 @@ namespace DailyRPG.Migrations
                         .IsRequired();
 
                     b.HasOne("DailyRpg.Models.Recipe", "Recipe")
-                        .WithMany("RecipeIngredients")
+                        .WithMany()
                         .HasForeignKey("RecipeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -318,11 +324,6 @@ namespace DailyRPG.Migrations
                     b.Navigation("Material");
 
                     b.Navigation("Recipe");
-                });
-
-            modelBuilder.Entity("DailyRpg.Models.Recipe", b =>
-                {
-                    b.Navigation("RecipeIngredients");
                 });
 
             modelBuilder.Entity("DailyRpg.Models.User", b =>

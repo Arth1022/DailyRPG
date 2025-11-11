@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using DailyRpg.Models;
 
+
 namespace DailyRpg.Data
 {
     public class ApiDbContext : DbContext
@@ -22,5 +23,9 @@ namespace DailyRpg.Data
         public DbSet<Item> Items { get; set; } = null!;
 
         public DbSet<InventorySlot> InventorySlots { get; set; } = null!;
+
+        public DbSet<Recipe> Recipes { get; set; } = null!;
+        public DbSet<RecipeIngredient> RecipeIngredients { get; set; } = null!;
+        
      } 
 }
