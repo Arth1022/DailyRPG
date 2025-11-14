@@ -4,6 +4,11 @@ import 'package:http/http.dart' as http;
 import '../models/hunter_user.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../models/boss_status.dart';
+import '../models/inventory_slot.dart';
+import '../models/item.dart';
+import '../models/recipe.dart';
+
 class ApiService{
   
   final _storage = const FlutterSecureStorage();
@@ -162,7 +167,7 @@ class ApiService{
   }
   
   Future<void> surrenderContract(String id) async {
-    try {
+    try { 
       final headers = await _getAuthHeaders();
       
       final response = await http.post(
@@ -177,7 +182,7 @@ class ApiService{
         print('ERRO NA API [Surrender]: Body = ${response.body}');
         throw Exception('Falha ao abandonar o contrato');
       }
-    } catch (e) {
+    } catch (e) { 
       print('EXCEÇÃO [Surrender]: $e');
       throw Exception('Falha ao conectar ao servidor (Surrender)');
     }
@@ -199,7 +204,7 @@ class ApiService{
       else{
         print('ERRO NA API [CREATE]: Status = ${response.statusCode}');
         print('ERRO NA API [CREATE]: Body = ${response.body}');
-        throw Exception('Falha ao criar o contrato');
+        throw Exception('Falha ao criar o contrato (Code: ${response.statusCode})');
       }
     }catch (e){
       print ('Exceção [CREATE]: $e');
@@ -228,4 +233,164 @@ class ApiService{
       throw Exception('Erro: $e');
     }
   }
+
+  Future<List<Item>> fetchShopItems() async {
+    try {
+      final headers = await _getAuthHeaders();
+      
+      final response = await http.get(
+        Uri.parse('$_baseUrl/ShopControllers'), 
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((json) => Item.fromJson(json)).toList();
+      } else {
+        print('ERRO API [Shop GET]: ${response.body}');
+        throw Exception('Falha ao carregar a loja');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [Shop GET]: $e');
+      throw Exception('Erro: $e');
+    }
+  }
+
+ 
+  Future<List<InventorySlot>> fetchInventory() async {
+    try {
+      final headers = await _getAuthHeaders();
+      
+      final response = await http.get(
+        Uri.parse('$_baseUrl/inventory'), 
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((json) => InventorySlot.fromJson(json)).toList();
+      } else {
+        print('ERRO API [Inventory GET]: ${response.body}');
+        throw Exception('Falha ao carregar o inventário');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [Inventory GET]: $e');
+      throw Exception('Erro: $e');
+    }
+  }
+
+  Future<HunterUser> useItem(int slotId) async {
+    try {
+      final headers = await _getAuthHeaders();
+      
+      final response = await http.post(
+        Uri.parse('$_baseUrl/inventory/use/$slotId'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic body = jsonDecode(response.body);
+        return HunterUser.fromJson(body['hunter']);
+      } else {
+        print('ERRO API [UseItem]: ${response.body}');
+        throw Exception('Falha ao usar o item');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [UseItem]: $e');
+      throw Exception('Erro: $e');
+    }
+  }
+
+  Future<List<Recipe>> fetchRecipes() async {
+    try {
+      final headers = await _getAuthHeaders();
+      
+      final response = await http.get(
+        Uri.parse('$_baseUrl/crafting'), 
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        return jsonList.map((json) => Recipe.fromJson(json)).toList();
+      } else {
+        print('ERRO API [Craft GET]: ${response.body}');
+        throw Exception('Falha ao carregar as receitas');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [Craft GET]: $e');
+      throw Exception('Erro: $e');
+    }
+  }
+
+
+  Future<void> craftItem(int recipeId) async {
+    try {
+      final headers = await _getAuthHeaders();
+      
+      final response = await http.post(
+        Uri.parse('$_baseUrl/crafting/$recipeId'), 
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+
+        return;
+      } else {
+        print('ERRO API [Craft POST]: ${response.body}');
+        final dynamic body = jsonDecode(response.body);
+        throw Exception(body['message'] ?? 'Falha ao criar o item');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [Craft POST]: $e');
+      throw Exception('Erro: $e');
+    }
+  }
+
+
+  Future<BossStatus> fetchBossStatus() async {
+    try {
+      final headers = await _getAuthHeaders();
+      
+      final response = await http.get(
+        Uri.parse('$_baseUrl/Boss'), 
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return BossStatus.fromJson(jsonDecode(response.body));
+      } else {
+        print('ERRO API [Boss GET]: ${response.body}');
+        throw Exception('Falha ao carregar o status do chefe');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [Boss GET]: $e');
+      throw Exception('Erro: $e');
+    }
+  }
+
+  Future<HunterUser> spendAttributePoint(String skillName) async {
+    try {
+      final headers = await _getAuthHeaders();
+      
+      final response = await http.post(
+        Uri.parse('$_baseUrl/Hunter/spend-point/$skillName'), 
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return HunterUser.fromJson(jsonDecode(response.body));
+      } else {
+        print('ERRO API [SpendPoint]: ${response.body}');
+        final dynamic body = jsonDecode(response.body);
+        throw Exception(body['message'] ?? 'Falha ao gastar o ponto');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [SpendPoint]: $e');
+      throw Exception('Erro: $e');
+    }
+  }
+
 }
+
+

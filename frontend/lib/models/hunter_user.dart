@@ -1,5 +1,3 @@
-//Construtor da classe HunterUser
-
 class HunterUser {
   final int id;
   final String hunterName;

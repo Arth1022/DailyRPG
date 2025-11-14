@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:dailyrpg/services/api_service.dart';
-
+import 'package:provider/provider.dart';
+import 'package:dailyrpg/providers/hunter_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -12,13 +12,9 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final ApiService _apiService = ApiService();
-
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -30,51 +26,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _register() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+      final provider = context.read<HunterProvider>();
 
-      try {
-        await _apiService.register(
-          _usernameController.text,
-          _passwordController.text,
-        );
+      final bool success = await provider.register(
+        _usernameController.text,
+        _passwordController.text,
+      );
 
+      if (success) {
         if (!mounted) return;
-
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Registo bem-sucedido! Faça o login.'),
             backgroundColor: Colors.green,
           ),
         );
-
-        // Volta para a tela de Login
         Navigator.of(context).pop();
-
-      } catch (e) {
-        // 5. FALHA! "Apanha" (catch) o erro que
-        //    a ApiService "lançou" (ex: "Utilizador já existe")
+      
+      } else {
         if (!mounted) return;
-        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro no Registo: $e'),
+            content: Text('Erro no Registo: ${provider.errorMessage}'),
             backgroundColor: Colors.red,
           ),
         );
-      } finally {
-
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool isLoading = context.watch<HunterProvider>().isLoading;
+
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Registar Novo Caçador'),
+      ),
       body: Stack(
         children: [
           Center(
@@ -98,6 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     TextFormField(
                       controller: _usernameController,
+                      enabled: !isLoading,
                       decoration: const InputDecoration(
                         labelText: 'Usuário',
                         border: OutlineInputBorder(),
@@ -117,6 +106,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     TextFormField(
                       controller: _passwordController,
                       obscureText: true,
+                      enabled: !isLoading,
                       decoration: const InputDecoration(
                         labelText: 'Senha',
                         border: OutlineInputBorder(),
@@ -136,6 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     TextFormField(
                       controller: _confirmPasswordController,
                       obscureText: true,
+                      enabled: !isLoading,
                       decoration: const InputDecoration(
                         labelText: 'Confirmar Senha',
                         border: OutlineInputBorder(),
@@ -156,22 +147,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
                       ),
-                      onPressed: _isLoading ? null : _register,
-                      child: _isLoading
+                      onPressed: isLoading ? null : _register,
+                      child: isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text('Registar'),
                     ),
-                    SizedBox(height: 50,)
                   ],
-                  
                 ),
-                
               ),
-              
             ),
-            
           ),
-          if (_isLoading)
+          if (isLoading)
             Container(
               color: Colors.black.withOpacity(0.5),
               child: const Center(
