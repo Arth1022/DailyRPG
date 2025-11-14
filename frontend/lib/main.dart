@@ -1,9 +1,7 @@
-import 'package:dailyrpg/screens/shop_screen.dart'; 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/api_service.dart';
 import 'screens/login_screen.dart';
-import 'dart:async';
 import 'providers/hunter_provider.dart';
 
 import 'screens/home_screen.dart'; 

@@ -118,6 +118,134 @@ class HunterProvider with ChangeNotifier {
       _setError(e.toString());
     }
   }
+  Future<void> completeContract(int id) async {
+    _setLoading(true);
+    try {
+      
+      final updatedHunter = await _apiService.completeContract(id);
+      
+      _hunter = updatedHunter;
+
+
+      _contracts = await _apiService.fetchContracts();
+      _bossStatus = await _apiService.fetchBossStatus();
+      _inventory = await _apiService.fetchInventory();
+      
+      _setError(null);
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> createContract(Map<String, dynamic> contractData) async {
+    _setLoading(true);
+    
+    try {
+      await _apiService.createContract(contractData);
+      
+      _contracts = await _apiService.fetchContracts();
+
+      _setError(null);
+      _setLoading(false);
+      return true; 
+
+    } catch (e) {
+      _setError(e.toString());
+      _setLoading(false);
+      return false; 
+    }   
+  }
+
+  Future<void> surrenderContract(int id) async {
+    _setLoading(true);
+    try {
+      await _apiService.surrenderContract(id);
+      
+      
+      _contracts = await _apiService.fetchContracts();
+      
+      _setError(null);
+    } catch (e) {
+      _setError(e.toString());
+      rethrow; 
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> buyItem(int id) async {
+    _setLoading(true);
+    try {
+      await _apiService.buyItem(id);
+      
+
+      _hunter = await _apiService.fetchHunterStats();
+  
+      _inventory = await _apiService.fetchInventory();
+      
+      _setError(null);
+    } catch (e) {
+      _setError(e.toString());
+      
+      rethrow; 
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> useItem(int slotId) async {
+    _setLoading(true);
+    try {
+
+      final updatedHunter = await _apiService.useItem(slotId);
+      _hunter = updatedHunter;
+
+      _inventory = await _apiService.fetchInventory();
+      
+      _setError(null);
+    } catch (e) {
+      _setError(e.toString());
+      rethrow; 
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> craftItem(int recipeId) async {
+    _setLoading(true);
+    try {
+      await _apiService.craftItem(recipeId);
+      
+      _inventory = await _apiService.fetchInventory();
+      
+      _setError(null);
+    } catch (e) {
+      _setError(e.toString());
+      rethrow; 
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> spendAttributePoint(String skillName) async {
+    _setLoading(true);
+    try {
+
+      final updatedHunter = await _apiService.spendAttributePoint(skillName);
+      
+      _hunter = updatedHunter;
+      _setError(null);
+    } catch (e) {
+      _setError(e.toString());
+      rethrow; 
+
+    } finally {
+      _setLoading(false);
+    }
+  }
 
   void _setLoading(bool loading) {
     _isLoading = loading;

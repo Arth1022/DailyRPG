@@ -1,5 +1,5 @@
 class Contract {
-  final String id;
+  final int id;
   final String title;
   final String description;
   final int xpReward;
@@ -23,7 +23,7 @@ class Contract {
     return Contract(
       
 
-      id: json['id']?.toString() ?? '', 
+      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0, 
       
       title: json['title']?.toString() ?? 'Sem Título',
       

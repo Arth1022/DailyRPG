@@ -1,3 +1,5 @@
+import 'package:dailyrpg/screens/inventory_screen.dart';
+import '../screens/craft_screen.dart';
 import 'package:flutter/material.dart';
 import '../models/hunter_user.dart';
 import 'health_bar.dart';
@@ -86,7 +88,7 @@ class HunterHeader extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 40,),
+                const SizedBox(width: 20.0),
                 const Icon(
                   Icons.monetization_on,
                   color: Colors.amber,
@@ -100,9 +102,20 @@ class HunterHeader extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 10,),
-
-                //Butão inventario
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.work_outline),
+                  iconSize: 30.0,
+                  color: Colors.grey[300],
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const InventoryScreen(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),

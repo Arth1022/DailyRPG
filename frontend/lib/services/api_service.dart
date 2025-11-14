@@ -103,7 +103,7 @@ class ApiService{
       final headers = await _getAuthHeaders();
       
       final response = await http.get(
-        Uri.parse('$_baseUrl/HunterControllers/stats'),
+        Uri.parse('$_baseUrl/Hunter/stats'),
         headers: headers,
       );
 
@@ -145,7 +145,7 @@ class ApiService{
     }
   }
 
-  Future<void> completeContract(String id) async {
+  Future<HunterUser> completeContract(int id) async {
     try {
       final headers = await _getAuthHeaders();
       
@@ -154,7 +154,9 @@ class ApiService{
         headers: headers,
       );
       if (response.statusCode == 200 || response.statusCode == 204) {
-        return;
+        final dynamic body = jsonDecode(response.body);
+        return HunterUser.fromJson(body['updateHunter']);
+
       } else {
         print('ERRO API [Complete]: Status Code = ${response.statusCode}');
         print('ERRO API [Complete]: Body = ${response.body}');
@@ -166,7 +168,7 @@ class ApiService{
     }
   }
   
-  Future<void> surrenderContract(String id) async {
+  Future<void> surrenderContract(int id) async {
     try { 
       final headers = await _getAuthHeaders();
       
@@ -198,7 +200,7 @@ class ApiService{
         body: jsonEncode(contractData)
       );
       
-      if (response.statusCode == 201){
+      if (response.statusCode == 200 || response.statusCode == 201){
         return;
       }
       else{
@@ -212,7 +214,7 @@ class ApiService{
     } 
   }
 
-  Future<void> buyItem(String id) async {
+  Future<void> buyItem(int id) async {
     try {
       final headers = await _getAuthHeaders();
       
@@ -364,6 +366,7 @@ class ApiService{
         throw Exception('Falha ao carregar o status do chefe');
       }
     } catch (e) {
+      // ignore: avoid_print
       print('EXCEÇÃO [Boss GET]: $e');
       throw Exception('Erro: $e');
     }

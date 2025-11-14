@@ -7,9 +7,10 @@ import '../widgets/hunter_header.dart';
 
 import '../screens/add_contract_screen.dart';
 import '../screens/shop_screen.dart';
+import '../screens/craft_screen.dart';
+import '../screens/arena_screen.dart';
 
 import '../providers/hunter_provider.dart';
-import '../models/hunter_user.dart';
 
 import 'login_screen.dart';
 
@@ -21,11 +22,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _contractListKey = GlobalKey<ContractListState>();
-
   void _refreshAllData() {
     context.read<HunterProvider>().loadInitialData();
-    _contractListKey.currentState?.refreshContracts();
   }
 
   Future<void> _navigateToAddContract(BuildContext context) async {
@@ -44,10 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final result = await Navigator.push(
         context, 
-        MaterialPageRoute(builder: (context) => ShopScreen(
-          hunter: hunter,
-          onPurchaseSuccess: _refreshAllData,
-        ))
+        MaterialPageRoute(builder: (context) => const ShopScreen())
     );
     
     if (result == true) {
@@ -92,7 +87,37 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Novo Contrato',
             backgroundColor: Colors.green,
             onTap: () => _navigateToAddContract(context),
-          )
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.security_outlined),
+            label: 'Arena',
+            backgroundColor: Colors.green,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ArenaScreen(),
+                ),
+              );
+            },
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.fireplace_outlined),
+            label: 'Forja',
+            backgroundColor: Colors.orange[800],
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CraftingScreen(),
+                ),
+              );
+
+              if (result == true) {
+                _refreshAllData();
+              }
+            },
+          ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -124,10 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 5,),
                   HunterHeader(hunter: hunter), 
                   const SizedBox(height: 20),
-                  ContractList(
-                    key: _contractListKey,
-                    onDataChanged: _refreshAllData, 
-                  ),
+                  ContractList(),
                 ],
               ),
             ),
