@@ -1,10 +1,11 @@
+import 'package:akar_icons_flutter/akar_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:dailyrpg/providers/hunter_provider.dart';
-import 'package:dailyrpg/models/inventory_slot.dart';
 import 'package:dailyrpg/models/item.dart';
 import 'package:dailyrpg/models/enums.dart';
+
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
@@ -21,7 +22,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
         return Icons.local_drink;
       case ItemType.Equipment:
         if (item.equipType == EquipmentType.Weapon) {
-          return Icons.gavel;
+          return AkarIcons.sword;
         } else if (item.equipType == EquipmentType.Armor) {
           return Icons.shield;
         }
@@ -174,7 +175,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
                     _buildStatRow(context, provider, 'Força', 'strength', hunter.strength, Icons.gavel, Colors.red[400]!),
                     _buildStatRow(context, provider, 'Destreza', 'dexterity', hunter.dexterity, Icons.flash_on, Colors.yellow[400]!),
-                    _buildStatRow(context, provider, 'Inteligência', 'intelligence', hunter.intelligence,Icons.favorite, Colors.blue[400]!),
+                    _buildStatRow(context, provider, 'Inteligência', 'intelligence', hunter.intelligence,Icons.book, const Color.fromARGB(255, 81, 245, 66)!),
                     _buildStatRow(context, provider, 'Constituição', 'constitution', hunter.constitution, Icons.favorite, Colors.blue[400]!),
                     _buildStatRow(context, provider, 'Vigor', 'endurance', hunter.endurance, Icons.shield, Colors.grey[400]!),
                     
@@ -183,9 +184,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Text('Dano: ${hunter.damage}', style: const TextStyle(fontSize: 14)),
-                        Text('HP: ${hunter.currentHp}/${hunter.maxHp}', style: const TextStyle(fontSize: 14)),
-                        Text('Defesa: ${hunter.defense}', style: const TextStyle(fontSize: 14)),
+                        Text('Dano: ${hunter.damage}', style: const TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+                        Text('HP: ${hunter.currentHp}/${hunter.maxHp}', style: const TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+                        Text('Defesa: ${hunter.defense}', style: const TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
                       ],
                     )
                   ],
@@ -211,15 +212,21 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     final bool canBeUsed = item.type != ItemType.Material;
 
                     return Card(
+                      color: Color.fromARGB(92, 204, 98, 12),
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                       child: ListTile(
-                        leading: Icon(_getIconForItem(item), size: 40, color: Colors.purple[200]),
+                       
+                        leading: Icon(_getIconForItem(item), size: 40, color: const Color.fromARGB(255, 255, 255, 255)),
                         title: Text(
                           item.name,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text('Quantidade: ${slot.quantity}\n${item.description}'),
                         trailing: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 88, 88, 88),
+                            foregroundColor: const Color.fromARGB(255, 255, 255, 255)
+                          ),
                           onPressed: (isLoading || !canBeUsed)
                             ? null
                             : () => _useItem(context, slot.id),

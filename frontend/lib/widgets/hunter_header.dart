@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import '../models/hunter_user.dart';
 import 'health_bar.dart';
 import 'xp_bar.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+
 
 class HunterHeader extends StatelessWidget {
   final HunterUser hunter;
@@ -26,20 +29,23 @@ class HunterHeader extends StatelessWidget {
         children: [
           Row(
             children: [
+              Icon(FontAwesomeIcons.userShield),
+              SizedBox(width: 14,),
               Text(
                 "${hunter.hunterName}",
                 style: TextStyle(
+                  color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold
                 ),
               )
             ],
           ),
-          SizedBox(height: 6.5,),
+          SizedBox(height: 25,),
           Row(
             children: [
               const Icon(
-                Icons.favorite,
+                FontAwesomeIcons.heartPulse,
                 color: Color(0xFFE53935),
                 size: 25.0,
               ),
@@ -56,8 +62,8 @@ class HunterHeader extends StatelessWidget {
           Row(
             children: [
               const Icon(
-                Icons.auto_stories,
-                color: Color(0xFFA67C52),
+                FontAwesomeIcons.diamond,
+                color: Color.fromARGB(255, 85, 166, 82),
                 size: 25.0,
               ),
               const SizedBox(width: 10.0),
@@ -75,7 +81,7 @@ class HunterHeader extends StatelessWidget {
             child: Row(
               children: [
                 const Icon(
-                  Icons.shield_moon,
+                  FontAwesomeIcons.book,
                   color: Color.fromARGB(255, 11, 223, 21),
                   size: 25.0,
                 ),
@@ -90,7 +96,7 @@ class HunterHeader extends StatelessWidget {
                 ),
                 const SizedBox(width: 20.0),
                 const Icon(
-                  Icons.monetization_on,
+                  FontAwesomeIcons.coins,
                   color: Colors.amber,
                   size: 20,
                 ),
@@ -102,9 +108,9 @@ class HunterHeader extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Spacer(),
+                SizedBox(width: 150,),
                 IconButton(
-                  icon: const Icon(Icons.work_outline),
+                  icon: const Icon(FontAwesomeIcons.layerGroup),
                   iconSize: 30.0,
                   color: Colors.grey[300],
                   onPressed: () {

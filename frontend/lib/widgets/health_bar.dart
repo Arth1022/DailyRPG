@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class LifeBar extends StatelessWidget {
   
   final int currentHp;
@@ -21,10 +22,10 @@ class LifeBar extends StatelessWidget {
     percentage = percentage.clamp(0.0, 1.0);
 
     return Container(
-      width: 100,
+      width: 400,
       height: 25.0,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color.fromARGB(255, 0, 0, 0),
         borderRadius: BorderRadius.circular(10.0),
       ),
       
@@ -39,7 +40,7 @@ class LifeBar extends StatelessWidget {
             children: [
               
               Container(
-                color: const Color(0xFF4D4033),
+                color: const Color.fromARGB(255, 0, 0, 0),
               ),
 
               FractionallySizedBox(

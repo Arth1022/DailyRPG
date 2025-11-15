@@ -5,6 +5,7 @@ import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/models/recipe.dart';
 import 'package:dailyrpg/models/inventory_slot.dart';
 
+
 class CraftingScreen extends StatefulWidget {
   const CraftingScreen({super.key});
 

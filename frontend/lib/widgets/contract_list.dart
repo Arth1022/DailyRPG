@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+
 import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/models/contract.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 
 
 class ContractList extends StatelessWidget {
@@ -60,7 +63,7 @@ class ContractList extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(
-                      Icons.check_box_outlined,
+                      FontAwesomeIcons.checkDouble,
                       color: Colors.green,
                     ),
               

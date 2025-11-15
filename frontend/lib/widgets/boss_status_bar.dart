@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+
 import 'package:dailyrpg/providers/hunter_provider.dart'; 
 import 'package:dailyrpg/widgets/health_bar.dart'; 
 
@@ -29,7 +30,7 @@ class BossStatusBar extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 20, 
                   fontWeight: FontWeight.bold, 
-                  color: Colors.redAccent
+                  color: Color.fromARGB(255, 255, 255, 255)
                 ),
               ),
               Text(

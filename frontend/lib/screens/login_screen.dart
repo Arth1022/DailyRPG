@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/screens/home_screen.dart'; 
 
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 

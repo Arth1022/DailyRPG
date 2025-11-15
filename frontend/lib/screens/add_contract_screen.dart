@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dailyrpg/providers/hunter_provider.dart';
 
+
 class AddContractScreen extends StatefulWidget{
   const AddContractScreen({super.key});
 

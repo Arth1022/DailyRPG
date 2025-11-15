@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class XpProgressBar extends StatelessWidget {
   
   final int currentXp;
@@ -24,7 +25,7 @@ class XpProgressBar extends StatelessWidget {
       width: 100,
       height: 25.0,
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 255, 255, 255), 
+        color: const Color.fromARGB(255, 15, 15, 15), 
         borderRadius: BorderRadius.circular(10.0),
       ),
       
@@ -39,14 +40,14 @@ class XpProgressBar extends StatelessWidget {
             children: [
               
               Container(
-                color: Colors.transparent,
+                color: const Color.fromARGB(0, 255, 255, 255),
               ),
 
               FractionallySizedBox(
                 alignment: Alignment.centerLeft,
                 widthFactor: percentage,
                 child: Container(
-                  color: Colors.green,
+                  color: const Color.fromARGB(255, 82, 166, 103),
                 ),
               ),
 

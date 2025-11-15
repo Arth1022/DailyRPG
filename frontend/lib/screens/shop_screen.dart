@@ -1,8 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:akar_icons_flutter/akar_icons_flutter.dart';
 
 import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/models/item.dart';
+
 import 'package:dailyrpg/models/enums.dart';
 
 class ShopScreen extends StatefulWidget {
@@ -43,12 +48,12 @@ class _ShopScreenState extends State<ShopScreen> {
   IconData _getIconForItem(Item item) {
     switch (item.type) {
       case ItemType.Consumable:
-        return Icons.local_drink;
+        return FontAwesomeIcons.flask;
       case ItemType.Equipment:
         if (item.equipType == EquipmentType.Weapon) {
-          return Icons.gavel;
+          return AkarIcons.sword;
         } else if (item.equipType == EquipmentType.Armor) {
-          return Icons.shield;
+          return FontAwesomeIcons.shield;
         }
         return Icons.style;
       case ItemType.Material:
@@ -87,7 +92,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
                     color: Colors.grey[850],
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -101,7 +106,7 @@ class _ShopScreenState extends State<ShopScreen> {
                       ),
                       const Spacer(),
                       Icon(
-                        Icons.monetization_on,
+                        FontAwesomeIcons.coins,
                         color: Colors.amber,
                       ),
                       Text(
@@ -122,9 +127,10 @@ class _ShopScreenState extends State<ShopScreen> {
                       final bool canAfford = hunter.currentCoins >= item.shopPrice;
 
                       return Card(
+          
                         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: ListTile(
-                          leading: Icon(_getIconForItem(item), size: 40, color: Colors.purple[200]),
+                          leading: Icon(_getIconForItem(item), size: 40, color: const Color.fromARGB(255, 77, 167, 209)),
                           title: Text(
                             item.name,
                             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -133,6 +139,10 @@ class _ShopScreenState extends State<ShopScreen> {
                             '${item.description}\nPreço: ${item.shopPrice} Moedas'
                           ),
                           trailing: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(255, 29, 29, 29),
+                              foregroundColor: Colors.white
+                            ),
                             onPressed: (isLoading || !canAfford)
                               ? null
                               : () => _buyItem(context, item),
