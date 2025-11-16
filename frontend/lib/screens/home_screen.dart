@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Mantido
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/contract_list.dart';
@@ -23,7 +24,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   void _refreshAllData() {
-    context.read<HunterProvider>().loadInitialData();
+    if (mounted) {
+      context.read<HunterProvider>().loadInitialData();
+    }
   }
 
   Future<void> _navigateToAddContract(BuildContext context) async {
@@ -31,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(builder: (context) => const AddContractScreen()),
     );
-    if (result == true) {
+    if (result == true && mounted) {
       _refreshAllData();
     }
   }
@@ -43,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final result = await Navigator.push(
         context, MaterialPageRoute(builder: (context) => const ShopScreen()));
 
-    if (result == true) {
+    if (result == true && mounted) {
       _refreshAllData();
     }
   }
@@ -65,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (result == true) {
+    if (result == true && mounted) {
       _refreshAllData();
     }
   }
@@ -73,12 +76,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onNavBarTapped(int index) {
     switch (index) {
       case 0:
-        _navigateToShop(context);
+        _refreshAllData();
         break;
       case 1:
-        _navigateToArena(context);
+        _navigateToShop(context);
         break;
       case 2:
+        _navigateToArena(context);
+        break;
+      case 3:
         _navigateToCrafting(context);
         break;
     }
@@ -86,42 +92,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Daily RPG"),
+        title: Text(
+          "Daily RPG",
+          style: GoogleFonts.cinzel(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
         actions: [
-          // NOVO: Menu Popup (três pontos)
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert), // Ícone de três pontos
+            icon: const Icon(Icons.more_vert),
             onSelected: (value) {
-              // Lógica para lidar com a seleção do menu
               if (value == 'settings') {
                 print('Configurações selecionadas');
-                // Ex: Navigator.push(context, MaterialPageRoute(builder: (c) => SettingsScreen()));
               } else if (value == 'about') {
                 print('Sobre selecionado');
-                // Ex: showAboutDialog(context: context);
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'settings',
-                child: Text('Configurações'),
-              ),
               const PopupMenuItem<String>(
                 value: 'about',
                 child: Text('Sobre'),
               ),
             ],
           ),
-
-          // Botão de Logout (MANTIDO)
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Sair (Logout)',
             onPressed: () {
               context.read<HunterProvider>().logout();
-
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (ctx) => const LoginScreen()),
                 (route) => false,
@@ -133,8 +140,9 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddContract(context),
         tooltip: 'Novo Contrato',
-        backgroundColor: Colors.blueGrey,
-        elevation: 0.0,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        elevation: 4.0,
         child: const Icon(FontAwesomeIcons.plus),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -142,19 +150,28 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onNavBarTapped,
         currentIndex: 0,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.grey[700],
-        unselectedItemColor: Colors.grey[700],
+        selectedItemColor: colorScheme.primary,
+        unselectedItemColor: Colors.grey[600],
+        backgroundColor: colorScheme.surface,
         items: const [
           BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home_filled),
+            label: 'Início',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.shopping_basket_outlined),
+            activeIcon: Icon(Icons.shopping_basket),
             label: 'Loja',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.security_outlined),
+            activeIcon: Icon(Icons.security),
             label: 'Arena',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.fireplace_outlined),
+            activeIcon: Icon(Icons.fireplace),
             label: 'Forja',
           ),
         ],
@@ -167,9 +184,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
           if (provider.hunter == null) {
             return Center(
-              child: Text(
-                'Erro ao carregar dados: ${provider.errorMessage}',
-                style: const TextStyle(color: Colors.red),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  'Erro ao carregar dados: ${provider.errorMessage}',
+                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
               ),
             );
           }
@@ -178,16 +199,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
-                    height: 5,
-                  ),
+                  const SizedBox(height: 16),
                   HunterHeader(hunter: hunter),
-                  const SizedBox(height: 20),
-                  ContractList(),
+                  const SizedBox(height: 24),
+                  Text(
+                    "Seus Contratos",
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: ContractList(),
+                  ),
                 ],
               ),
             ),

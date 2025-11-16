@@ -40,6 +40,7 @@ dependencies:
   provider: ^6.1.2
   akar_icons_flutter: ^1.0.0
   font_awesome_flutter: ^10.7.0
+  google_fonts: ^6.3.2
 
 
 dev_dependencies:

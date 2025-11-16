@@ -24,7 +24,7 @@ class HunterProvider with ChangeNotifier {
 
   final ApiService _apiService = ApiService();
 
- 
+  
   HunterUser? get hunter => _hunter;
   List<Contract> get contracts => _contracts;
   List<Item> get shopItems => _shopItems;
@@ -50,7 +50,7 @@ class HunterProvider with ChangeNotifier {
       _setLoading(false);
       return true; 
     } catch (e) {
-     
+      
       _setError(e.toString());
       _setLoading(false);
       return false; 
@@ -118,6 +118,8 @@ class HunterProvider with ChangeNotifier {
       _setError(e.toString());
     }
   }
+
+  // --- ESTA É A FUNÇÃO CORRIGIDA ---
   Future<void> completeContract(int id) async {
     _setLoading(true);
     try {
@@ -126,19 +128,21 @@ class HunterProvider with ChangeNotifier {
       
       _hunter = updatedHunter;
 
+      // 1. Apenas remove da lista local (sem re-buscar da API)
+      _contracts.removeWhere((contract) => contract.id == id);
 
-      _contracts = await _apiService.fetchContracts();
+      // 2. Atualiza o chefe (necessário)
       _bossStatus = await _apiService.fetchBossStatus();
-      _inventory = await _apiService.fetchInventory();
       
       _setError(null);
     } catch (e) {
       _setError(e.toString());
     } finally {
-
+      // 3. Notifica a tela
       _setLoading(false);
     }
   }
+  // --- FIM DA CORREÇÃO ---
 
   Future<bool> createContract(Map<String, dynamic> contractData) async {
     _setLoading(true);
@@ -159,31 +163,32 @@ class HunterProvider with ChangeNotifier {
     }   
   }
 
+  // --- ESTA É A FUNÇÃO CORRIGIDA ---
   Future<void> surrenderContract(int id) async {
     _setLoading(true);
     try {
       await _apiService.surrenderContract(id);
       
-      
-      _contracts = await _apiService.fetchContracts();
+      // 1. Apenas remove da lista local (sem re-buscar da API)
+      _contracts.removeWhere((contract) => contract.id == id);
       
       _setError(null);
     } catch (e) {
       _setError(e.toString());
       rethrow; 
     } finally {
+      // 2. Notifica a tela
       _setLoading(false);
     }
   }
+  // --- FIM DA CORREÇÃO ---
 
   Future<void> buyItem(int id) async {
     _setLoading(true);
     try {
       await _apiService.buyItem(id);
       
-
       _hunter = await _apiService.fetchHunterStats();
-  
       _inventory = await _apiService.fetchInventory();
       
       _setError(null);
@@ -199,7 +204,6 @@ class HunterProvider with ChangeNotifier {
   Future<void> useItem(int slotId) async {
     _setLoading(true);
     try {
-
       final updatedHunter = await _apiService.useItem(slotId);
       _hunter = updatedHunter;
 
@@ -233,7 +237,6 @@ class HunterProvider with ChangeNotifier {
   Future<void> spendAttributePoint(String skillName) async {
     _setLoading(true);
     try {
-
       final updatedHunter = await _apiService.spendAttributePoint(skillName);
       
       _hunter = updatedHunter;

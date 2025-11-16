@@ -1,46 +1,50 @@
+import 'package:akar_icons_flutter/akar_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 
 import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/models/contract.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-
-
 class ContractList extends StatelessWidget {
-  
   const ContractList({super.key});
-
 
   @override
   Widget build(BuildContext context) {
-
     final provider = context.watch<HunterProvider>();
-    
+
     final List<Contract> contracts = provider.contracts;
-    
+
     final bool isLoading = provider.isLoading;
-   
+
     if (isLoading && contracts.isEmpty) {
-     
       return const Center(
         child: CircularProgressIndicator(),
       );
     }
-    
+
     if (contracts.isEmpty) {
       return const Center(
         child: Text('Nenhum contrato ativo'),
       );
     }
-    
-   
+
     return Expanded(
       child: ListView.builder(
         itemCount: contracts.length,
         itemBuilder: (context, index) {
           final contract = contracts[index];
+
+          String formattedDate;
+          if (contract.startDate != null) {
+            final date = contract.startDate!;
+            
+            formattedDate =
+                "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
+            
+          } else {
+            formattedDate = "N/A";
+          }
 
           return Card(
             margin: const EdgeInsets.symmetric(vertical: 8),
@@ -48,10 +52,10 @@ class ContractList extends StatelessWidget {
             child: ExpansionTile(
               title: Row(
                 children: [
-                  const Icon(
-                    Icons.sports_gymnastics
+                  const Icon(AkarIcons.double_sword),
+                  const SizedBox(
+                    width: 16,
                   ),
-                  SizedBox(width: 16,),
                   Expanded(
                     child: Text(
                       contract.title,
@@ -62,18 +66,17 @@ class ContractList extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(
-                      FontAwesomeIcons.checkDouble,
-                      color: Colors.green,
-                    ),
-              
-                    onPressed: isLoading 
-                      ? null 
-                      : () {
-                 
-                        context.read<HunterProvider>().completeContract(contract.id);
-                      }
-                  )
+                      icon: const Icon(
+                        FontAwesomeIcons.checkDouble,
+                        color: Colors.green,
+                      ),
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              context
+                                  .read<HunterProvider>()
+                                  .completeContract(contract.id);
+                            })
                 ],
               ),
               children: [
@@ -86,27 +89,29 @@ class ContractList extends StatelessWidget {
                       const SizedBox(
                         height: 10,
                       ),
-                      Text("Inicio : ${contract.startDate?.toString() ?? 'N/A'}"),
+                      Text("Inicio : $formattedDate"),
                       const SizedBox(
                         height: 10,
                       ),
-                      Text("Recompensa: ${contract.xpReward} XP, ${contract.coinReward} G"),
+                      Text(
+                        
+                          "Recompensa: ${contract.xpReward} XP, ${contract.coinReward} G"),
                       const SizedBox(
                         height: 15,
                       ),
                       Center(
                         child: ElevatedButton(
-                 
                           onPressed: isLoading
-                            ? null
-                            : () {
-                       
-                              context.read<HunterProvider>().surrenderContract(contract.id);
-                            },
+                              ? null
+                              : () {
+                                  context
+                                      .read<HunterProvider>()
+                                      .surrenderContract(contract.id);
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red[800],
                           ),
-                          child: const Text('Desistir do contrato'),
+                          child: const Text('Desistir'),
                         ),
                       )
                     ],

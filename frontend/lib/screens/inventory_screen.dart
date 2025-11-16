@@ -34,18 +34,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
     }
   }
 
-  String _getButtonText(Item item) {
-    switch (item.type) {
-      case ItemType.Consumable:
-        return "Usar";
-      case ItemType.Equipment:
-        return "Equipar";
-      case ItemType.Material:
-        return "Material";
-      default:
-        return "Ver";
-    }
-  }
 
   void _useItem(BuildContext context, int slotId) async {
     final provider = context.read<HunterProvider>();
@@ -55,7 +43,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Item usado/equipado com sucesso!'),
+          content: Text('Ação realizada com sucesso!'),
           backgroundColor: Colors.green,
         ),
       );
@@ -209,13 +197,37 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   itemBuilder: (context, index) {
                     final slot = inventory[index];
                     final item = slot.item;
-                    final bool canBeUsed = item.type != ItemType.Material;
+                    
+                    final bool isEquipped = 
+                        (hunter.equippedWeaponSlotId == slot.id) || 
+                        (hunter.equippedArmorSlotId == slot.id);
+
+                    String buttonText;
+                    Color buttonColor;
+                    bool canBeUsed = true;
+
+                    if (item.type == ItemType.Equipment) {
+                      if (isEquipped) {
+                        buttonText = 'Desequipar';
+                        buttonColor = Colors.grey[600]!;
+                      } else {
+                        buttonText = 'Equipar';
+                        buttonColor = Colors.blue[600]!;
+                      }
+                    } else if (item.type == ItemType.Consumable) {
+                      buttonText = 'Usar';
+                      buttonColor = Colors.green[600]!;
+                    } else {
+                      buttonText = 'Material';
+                      canBeUsed = false;
+                      buttonColor = const Color.fromARGB(255, 88, 88, 88);
+                    }
 
                     return Card(
                       color: Color.fromARGB(92, 204, 98, 12),
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                       child: ListTile(
-                       
+                        
                         leading: Icon(_getIconForItem(item), size: 40, color: const Color.fromARGB(255, 255, 255, 255)),
                         title: Text(
                           item.name,
@@ -224,13 +236,13 @@ class _InventoryScreenState extends State<InventoryScreen> {
                         subtitle: Text('Quantidade: ${slot.quantity}\n${item.description}'),
                         trailing: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 88, 88, 88),
+                            backgroundColor: buttonColor,
                             foregroundColor: const Color.fromARGB(255, 255, 255, 255)
                           ),
                           onPressed: (isLoading || !canBeUsed)
                             ? null
                             : () => _useItem(context, slot.id),
-                          child: Text(_getButtonText(item)),
+                          child: Text(buttonText), 
                         ),
                       ),
                     );

@@ -10,6 +10,9 @@ import 'package:dailyrpg/models/item.dart';
 
 import 'package:dailyrpg/models/enums.dart';
 
+
+enum ShopFilter { todos, equipamentos, itens }
+
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
 
@@ -19,6 +22,8 @@ class ShopScreen extends StatefulWidget {
 
 class _ShopScreenState extends State<ShopScreen> {
   bool _purchaseMade = false;
+
+  Set<ShopFilter> _currentFilter = {ShopFilter.todos};
 
   void _buyItem(BuildContext context, Item item) async {
     final provider = context.read<HunterProvider>();
@@ -77,11 +82,29 @@ class _ShopScreenState extends State<ShopScreen> {
         body: Consumer<HunterProvider>(
           builder: (context, provider, child) {
             final hunter = provider.hunter;
-            final shopItems = provider.shopItems;
+            final shopItems = provider.shopItems; 
             final isLoading = provider.isLoading;
 
             if (hunter == null) {
               return const Center(child: Text('Erro ao carregar o caçador.'));
+            }
+
+            final ShopFilter selectedFilter = _currentFilter.first;
+            final List<Item> filteredItems; 
+
+            if (selectedFilter == ShopFilter.equipamentos) {
+      
+              filteredItems = shopItems.where((item) {
+                return item.type == ItemType.Equipment;
+              }).toList();
+            } else if (selectedFilter == ShopFilter.itens) {
+              filteredItems = shopItems.where((item) {
+                return item.type == ItemType.Consumable ||
+                    item.type == ItemType.Material;
+              }).toList();
+            } else {
+          
+              filteredItems = shopItems;
             }
 
             return Column(
@@ -119,34 +142,78 @@ class _ShopScreenState extends State<ShopScreen> {
                     ],
                   ),
                 ),
+               
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: SegmentedButton<ShopFilter>(
+                    segments: const <ButtonSegment<ShopFilter>>[
+                      ButtonSegment(
+                        value: ShopFilter.todos,
+                        label: Text('Todos'),
+                        icon: Icon(Icons.apps),
+                      ),
+                      ButtonSegment(
+                        value: ShopFilter.equipamentos,
+                        label: Text('Equip.'), 
+                        icon: Icon(AkarIcons.sword),
+                      ),
+                      ButtonSegment(
+                        value: ShopFilter.itens,
+                        label: Text('Itens'), 
+                        icon: Icon(FontAwesomeIcons.flask),
+                      ),
+                    ],
+              
+                    selected: _currentFilter,
+                    onSelectionChanged: (Set<ShopFilter> newSelection) {
+                      setState(() {
+            
+                        _currentFilter = newSelection;
+                      });
+                    },
+                  
+                    style: SegmentedButton.styleFrom(
+                      backgroundColor: Colors.grey[800],
+                      foregroundColor: Colors.white70,
+                      selectedForegroundColor: Colors.white,
+                      selectedBackgroundColor:
+                          const Color.fromARGB(255, 77, 167, 209),
+                    ),
+                  ),
+                ),
+                 const Divider(height: 20),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: shopItems.length,
+          
+                    itemCount: filteredItems.length,
                     itemBuilder: (context, index) {
-                      final item = shopItems[index];
-                      final bool canAfford = hunter.currentCoins >= item.shopPrice;
+           
+                      final item = filteredItems[index];
+                      final bool canAfford =
+                          hunter.currentCoins >= item.shopPrice;
 
                       return Card(
-          
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         child: ListTile(
-                          leading: Icon(_getIconForItem(item), size: 40, color: const Color.fromARGB(255, 77, 167, 209)),
+                          leading: Icon(_getIconForItem(item),
+                              size: 40,
+                              color: const Color.fromARGB(255, 77, 167, 209)),
                           title: Text(
                             item.name,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            '${item.description}\nPreço: ${item.shopPrice} Moedas'
-                          ),
+                              '${item.description}\nPreço: ${item.shopPrice} Moedas'),
                           trailing: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(255, 29, 29, 29),
-                              foregroundColor: Colors.white
-                            ),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 29, 29, 29),
+                                foregroundColor: Colors.white),
                             onPressed: (isLoading || !canAfford)
-                              ? null
-                              : () => _buyItem(context, item),
-                            
+                                ? null
+                                : () => _buyItem(context, item),
                             child: Text(isLoading
                                 ? '...'
                                 : (canAfford ? 'Comprar' : 'Sem Ouro')),

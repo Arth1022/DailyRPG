@@ -4,6 +4,8 @@ class BossStatus {
   final int bossLevel; 
   final int currentHp;
   final int maxHp;     
+  final int rewardXp;
+  final int rewardCoin;
 
 
   BossStatus({
@@ -11,6 +13,8 @@ class BossStatus {
     required this.bossLevel,
     required this.currentHp,
     required this.maxHp,
+    required this.rewardXp,
+    required this.rewardCoin,
   });
 
 
@@ -21,6 +25,8 @@ class BossStatus {
       bossLevel: json['bossLevel'] ?? 1,
       currentHp: json['currentHp'] ?? 0,
       maxHp: json['maxHp'] ?? 100,
+      rewardCoin: json['rewardCoin'] ?? 50,
+      rewardXp: json['rewardXp'] ?? 100
     );
   }
 }

@@ -41,6 +41,7 @@ class HunterHeader extends StatelessWidget {
               )
             ],
           ),
+          const Divider(height: 20),
           SizedBox(height: 25,),
           Row(
             children: [

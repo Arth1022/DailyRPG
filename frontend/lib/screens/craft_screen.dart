@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:akar_icons_flutter/akar_icons_flutter.dart';
+import 'package:dailyrpg/models/enums.dart'; 
 
 import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/models/recipe.dart';
 import 'package:dailyrpg/models/inventory_slot.dart';
 
+enum CraftingFilter { todos, equipamentos, itens }
 
 class CraftingScreen extends StatefulWidget {
   const CraftingScreen({super.key});
@@ -14,8 +18,9 @@ class CraftingScreen extends StatefulWidget {
 }
 
 class _CraftingScreenState extends State<CraftingScreen> {
-
   bool _craftingAttempted = false;
+
+  Set<CraftingFilter> _currentFilter = {CraftingFilter.todos};
 
   String _buildIngredientsList(Recipe recipe) {
     return recipe.ingredients.map((ing) {
@@ -31,12 +36,12 @@ class _CraftingScreenState extends State<CraftingScreen> {
           if (slot.quantity >= req.quantityRequired) {
             found = true;
           }
-          break; 
+          break;
         }
       }
-      if (!found) return false; 
+      if (!found) return false;
     }
-    return true; 
+    return true;
   }
 
   void _craftItem(BuildContext context, Recipe recipe) async {
@@ -78,7 +83,7 @@ class _CraftingScreenState extends State<CraftingScreen> {
         ),
         body: Consumer<HunterProvider>(
           builder: (context, provider, child) {
-            final recipes = provider.recipes;
+            final recipes = provider.recipes; 
             final inventory = provider.inventory;
             final isLoading = provider.isLoading;
 
@@ -86,37 +91,98 @@ class _CraftingScreenState extends State<CraftingScreen> {
               return const Center(child: Text('Nenhuma receita encontrada.'));
             }
 
-            return ListView.builder(
-              itemCount: recipes.length,
-              itemBuilder: (context, index) {
-                final recipe = recipes[index];
-                final item = recipe.itemCreated;
-                
-                final bool canCraft = _canCraft(recipe, inventory);
-                final String ingredients = _buildIngredientsList(recipe);
+            final CraftingFilter selectedFilter = _currentFilter.first;
+            final List<Recipe> filteredRecipes; 
 
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: ListTile(
-                    leading: const Icon(Icons.fireplace_outlined, size: 40, color: Colors.orange),
-                    title: Text(
-                      item.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      'Cria: ${item.description}\nRequer: $ingredients'
-                    ),
-                    trailing: ElevatedButton(
-                      onPressed: (isLoading || !canCraft)
-                        ? null 
-                        : () => _craftItem(context, recipe),
-                      child: Text(isLoading
-                          ? '...'
-                          : (canCraft ? 'Criar' : 'Faltam Itens')),
+            if (selectedFilter == CraftingFilter.equipamentos) {
+              filteredRecipes = recipes.where((recipe) {
+                return recipe.itemCreated.type == ItemType.Equipment;
+              }).toList();
+            } else if (selectedFilter == CraftingFilter.itens) {
+              filteredRecipes = recipes.where((recipe) {
+                return recipe.itemCreated.type == ItemType.Consumable ||
+                    recipe.itemCreated.type == ItemType.Material;
+              }).toList();
+            } else {
+              filteredRecipes = recipes;
+            }
+
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 12.0),
+                  child: SegmentedButton<CraftingFilter>(
+                    segments: const <ButtonSegment<CraftingFilter>>[
+                      ButtonSegment(
+                        value: CraftingFilter.todos,
+                        label: Text('Todos'),
+                        icon: Icon(Icons.apps),
+                      ),
+                      ButtonSegment(
+                        value: CraftingFilter.equipamentos,
+                        label: Text('Equip.'),
+                        icon: Icon(AkarIcons.sword),
+                      ),
+                      ButtonSegment(
+                        value: CraftingFilter.itens,
+                        label: Text('Itens'),
+                        icon: Icon(FontAwesomeIcons.flask),
+                      ),
+                    ],
+                    selected: _currentFilter,
+                    onSelectionChanged: (Set<CraftingFilter> newSelection) {
+                      setState(() {
+                        _currentFilter = newSelection;
+                      });
+                    },
+                    style: SegmentedButton.styleFrom(
+                      backgroundColor: Colors.grey[800],
+                      foregroundColor: Colors.white70,
+                      selectedForegroundColor: Colors.white,
+                      selectedBackgroundColor: Colors.orange[700], // Cor tema da forja
                     ),
                   ),
-                );
-              },
+                ),
+
+                Expanded(
+                  child: ListView.builder(
+                    // ATUALIZADO: Usar a lista filtrada
+                    itemCount: filteredRecipes.length,
+                    itemBuilder: (context, index) {
+                      // ATUALIZADO: Usar a lista filtrada
+                      final recipe = filteredRecipes[index];
+                      final item = recipe.itemCreated;
+
+                      final bool canCraft = _canCraft(recipe, inventory);
+                      final String ingredients = _buildIngredientsList(recipe);
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: ListTile(
+                          leading: const Icon(Icons.fireplace_outlined,
+                              size: 40, color: Colors.orange),
+                          title: Text(
+                            item.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                              'Cria: ${item.description}\nRequer: $ingredients'),
+                          trailing: ElevatedButton(
+                            onPressed: (isLoading || !canCraft)
+                                ? null
+                                : () => _craftItem(context, recipe),
+                            child: Text(isLoading
+                                ? '...'
+                                : (canCraft ? 'Criar' : 'Faltam Itens')),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           },
         ),
