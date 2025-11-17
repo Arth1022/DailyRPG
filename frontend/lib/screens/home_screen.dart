@@ -44,7 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (hunter == null) return;
 
     final result = await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const ShopScreen()));
+      context,
+      MaterialPageRoute(builder: (context) => const ShopScreen()),
+    );
 
     if (result == true && mounted) {
       _refreshAllData();
@@ -54,18 +56,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _navigateToArena(BuildContext context) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ArenaScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const ArenaScreen()),
     );
   }
 
   Future<void> _navigateToCrafting(BuildContext context) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const CraftingScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const CraftingScreen()),
     );
 
     if (result == true && mounted) {
@@ -92,136 +90,198 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    // CORES E ESTILOS PIXEL
+    const darkBackgroundColor = Color.fromARGB(255, 30, 30, 30);
+    const primaryPixelColor = Color.fromARGB(255, 77, 167, 209);
+    const appBarColor = Color.fromARGB(255, 40, 40, 40);
+    const navBarColor = Color.fromARGB(255, 40, 40, 40);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          "Daily RPG",
-          style: GoogleFonts.cinzel(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: darkBackgroundColor,
+        appBarTheme: AppBarTheme(
+          backgroundColor: appBarColor,
+          titleTextStyle: GoogleFonts.pressStart2p(
+            fontSize: 16,
+            color: Colors.white,
           ),
+          centerTitle: true,
+          elevation: 0,
         ),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              if (value == 'settings') {
-                print('Configurações selecionadas');
-              } else if (value == 'about') {
-                print('Sobre selecionado');
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
-                value: 'about',
-                child: Text('Sobre'),
+        // Adicionando um esquema de cores para manter o estilo dark
+        colorScheme: const ColorScheme.dark().copyWith(
+          primary: primaryPixelColor,
+          onPrimary: Colors.black,
+          surface: navBarColor,
+          onSurface: Colors.white,
+          background: darkBackgroundColor,
+        ),
+      ),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            "DAILY RPG", // Título em Caps lock para o estilo pressStart2p
+          ),
+          actions: [
+            // Menu de Ações (PopupMenuButton)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              color: appBarColor, // Fundo escuro para o menu
+              onSelected: (value) {
+                if (value == 'about') {
+                  // Ação "Sobre"
+                } else if (value == 'logout') {
+                  context.read<HunterProvider>().logout();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (ctx) => const LoginScreen()),
+                    (route) => false,
+                  );
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'about',
+                  child: Text(
+                    'Sobre',
+                    style: GoogleFonts.pixelifySans(color: Colors.white),
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'logout',
+                  child: Text(
+                    'Sair',
+                    style: GoogleFonts.pixelifySans(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        floatingActionButton: Container(
+          // Container para a Borda Pixelada do FAB
+          decoration: BoxDecoration(
+            color: primaryPixelColor,
+            border: Border.all(
+              color: const Color.fromARGB(255, 30, 100, 130),
+              width: 3,
+            ),
+            boxShadow: const [
+              // Sombra superior/esquerda (Luz)
+              BoxShadow(
+                color: Color.fromARGB(255, 120, 200, 240),
+                offset: Offset(-2, -2),
+                blurRadius: 0,
+                spreadRadius: 0,
+              ),
+              // Sombra inferior/direita (Sombra)
+              BoxShadow(
+                color: Color.fromARGB(255, 30, 100, 130),
+                offset: Offset(2, 2),
+                blurRadius: 0,
+                spreadRadius: 0,
               ),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sair (Logout)',
-            onPressed: () {
-              context.read<HunterProvider>().logout();
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (ctx) => const LoginScreen()),
-                (route) => false,
-              );
-            },
+          child: FloatingActionButton(
+            onPressed: () => _navigateToAddContract(context),
+            tooltip: 'Novo Contrato',
+            backgroundColor: const Color.fromARGB(
+              255,
+              29,
+              29,
+              29,
+            ), // Cor interna do botão escura
+            foregroundColor: Colors.white,
+            elevation: 0, // Remover elevação padrão
+            shape: const BeveledRectangleBorder(
+              borderRadius: BorderRadius.zero,
+              side: BorderSide.none,
+            ),
+            child: const Icon(FontAwesomeIcons.plus),
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddContract(context),
-        tooltip: 'Novo Contrato',
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        elevation: 4.0,
-        child: const Icon(FontAwesomeIcons.plus),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: _onNavBarTapped,
-        currentIndex: 0,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: colorScheme.primary,
-        unselectedItemColor: Colors.grey[600],
-        backgroundColor: colorScheme.surface,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home_filled),
-            label: 'Início',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_basket_outlined),
-            activeIcon: Icon(Icons.shopping_basket),
-            label: 'Loja',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.security_outlined),
-            activeIcon: Icon(Icons.security),
-            label: 'Arena',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.fireplace_outlined),
-            activeIcon: Icon(Icons.fireplace),
-            label: 'Forja',
-          ),
-        ],
-      ),
-      body: Consumer<HunterProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        bottomNavigationBar: BottomNavigationBar(
+          onTap: _onNavBarTapped,
+          currentIndex: 0,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: primaryPixelColor,
+          unselectedItemColor: Colors.grey[600],
+          backgroundColor: navBarColor,
+          items: [
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home_filled),
+              label: 'INÍCIO',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_basket_outlined),
+              activeIcon: Icon(Icons.shopping_basket),
+              label: 'LOJA',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.security_outlined),
+              activeIcon: Icon(Icons.security),
+              label: 'ARENA',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.fireplace_outlined),
+              activeIcon: Icon(Icons.fireplace),
+              label: 'FORJA',
+            ),
+          ],
+        ),
+        body: Consumer<HunterProvider>(
+          builder: (context, provider, child) {
+            if (provider.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (provider.hunter == null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Text(
-                  'Erro ao carregar dados: ${provider.errorMessage}',
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
-                  textAlign: TextAlign.center,
+            if (provider.hunter == null) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Text(
+                    'Erro ao carregar dados: ${provider.errorMessage}',
+                    style: GoogleFonts.pixelifySans(
+                      color: Colors.red,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          final hunter = provider.hunter!;
+            final hunter = provider.hunter!;
 
-          return SafeArea(
-            child: Padding(
+            // REMOÇÃO DO SafeArea e ajuste de Padding
+            return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
+                  // HunterHeader (Assumimos que ele está estilizado)
                   HunterHeader(hunter: hunter),
                   const SizedBox(height: 24),
+                  // Título da Seção (Pixelado)
                   Text(
-                    "Seus Contratos",
-                    style: theme.textTheme.headlineSmall?.copyWith(
+                    "SEUS CONTRATOS",
+                    style: GoogleFonts.pressStart2p(
+                      fontSize: 10, // Menor para encaixar
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: ContractList(),
-                  ),
+                  const Divider(height: 20, color: Colors.white12),
+                  // Lista de Contratos (Já estilizada)
+                  const ContractList(),
                 ],
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

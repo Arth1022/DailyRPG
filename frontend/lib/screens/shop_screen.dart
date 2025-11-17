@@ -1,15 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:akar_icons_flutter/akar_icons_flutter.dart';
 
 import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/models/item.dart';
-
 import 'package:dailyrpg/models/enums.dart';
-
 
 enum ShopFilter { todos, equipamentos, itens }
 
@@ -23,7 +22,38 @@ class ShopScreen extends StatefulWidget {
 class _ShopScreenState extends State<ShopScreen> {
   bool _purchaseMade = false;
 
-  Set<ShopFilter> _currentFilter = {ShopFilter.todos};
+  // Mapa de filtros para a loja
+  static const Map<ShopFilter, String> _shopFilters = {
+    ShopFilter.todos: 'TODOS',
+    ShopFilter.equipamentos: 'EQUIPAMENTOS',
+    ShopFilter.itens: 'ITENS',
+  };
+
+  ShopFilter _currentFilter = ShopFilter.todos;
+
+  // --- Estilos e Cores Pixelados (Copiados da InventoryScreen) ---
+  static const darkCardColor = Color.fromARGB(
+    255,
+    40,
+    40,
+    40,
+  ); // Cor de fundo do Card/Botão Não Selecionado
+  static const pixelPrimaryColor = Color.fromARGB(
+    255,
+    77,
+    167,
+    209,
+  ); // Cor de destaque
+  static const darkBackgroundColor = Color.fromARGB(
+    255,
+    30,
+    30,
+    30,
+  ); // Fundo da tela
+
+  TextStyle get _pixelStatValueStyle =>
+      GoogleFonts.pressStart2p(fontSize: 12, fontWeight: FontWeight.bold);
+  // ------------------------------------------------------------------
 
   void _buyItem(BuildContext context, Item item) async {
     final provider = context.read<HunterProvider>();
@@ -35,7 +65,7 @@ class _ShopScreenState extends State<ShopScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Você comprou: ${item.name}!'),
+          content: Text('Comprado! Você adquiriu: ${item.name}'),
           backgroundColor: Colors.green,
         ),
       );
@@ -43,7 +73,7 @@ class _ShopScreenState extends State<ShopScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Falha ao comprar: ${provider.errorMessage}'),
+          content: Text('Falha na compra: ${provider.errorMessage}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -68,164 +98,239 @@ class _ShopScreenState extends State<ShopScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pop(context, _purchaseMade);
-        return true;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Loja do Aventureiro'),
-        ),
-        body: Consumer<HunterProvider>(
-          builder: (context, provider, child) {
-            final hunter = provider.hunter;
-            final shopItems = provider.shopItems; 
-            final isLoading = provider.isLoading;
-
-            if (hunter == null) {
-              return const Center(child: Text('Erro ao carregar o caçador.'));
-            }
-
-            final ShopFilter selectedFilter = _currentFilter.first;
-            final List<Item> filteredItems; 
-
-            if (selectedFilter == ShopFilter.equipamentos) {
-      
-              filteredItems = shopItems.where((item) {
-                return item.type == ItemType.Equipment;
-              }).toList();
-            } else if (selectedFilter == ShopFilter.itens) {
-              filteredItems = shopItems.where((item) {
-                return item.type == ItemType.Consumable ||
-                    item.type == ItemType.Material;
-              }).toList();
-            } else {
-          
-              filteredItems = shopItems;
-            }
-
-            return Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.all(16.0),
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[850],
-                    borderRadius: BorderRadius.circular(10),
+  // Novo Widget de Botões de Filtro Centralizado
+  Widget _buildFilterButtons() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: _shopFilters.entries.map((entry) {
+            final isSelected = entry.key == _currentFilter;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _currentFilter = entry.key;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isSelected
+                      ? pixelPrimaryColor
+                      : darkCardColor,
+                  foregroundColor: isSelected ? darkCardColor : Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Loja do Aventureiro',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                      Icon(
-                        FontAwesomeIcons.coins,
-                        color: Colors.amber,
-                      ),
-                      Text(
-                        ' ${hunter.currentCoins}G',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.yellow,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-               
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: SegmentedButton<ShopFilter>(
-                    segments: const <ButtonSegment<ShopFilter>>[
-                      ButtonSegment(
-                        value: ShopFilter.todos,
-                        label: Text('Todos'),
-                        icon: Icon(Icons.apps),
-                      ),
-                      ButtonSegment(
-                        value: ShopFilter.equipamentos,
-                        label: Text('Equip.'), 
-                        icon: Icon(AkarIcons.sword),
-                      ),
-                      ButtonSegment(
-                        value: ShopFilter.itens,
-                        label: Text('Itens'), 
-                        icon: Icon(FontAwesomeIcons.flask),
-                      ),
-                    ],
-              
-                    selected: _currentFilter,
-                    onSelectionChanged: (Set<ShopFilter> newSelection) {
-                      setState(() {
-            
-                        _currentFilter = newSelection;
-                      });
-                    },
-                  
-                    style: SegmentedButton.styleFrom(
-                      backgroundColor: Colors.grey[800],
-                      foregroundColor: Colors.white70,
-                      selectedForegroundColor: Colors.white,
-                      selectedBackgroundColor:
-                          const Color.fromARGB(255, 77, 167, 209),
+                  shape: BeveledRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                    side: BorderSide(
+                      color: isSelected ? Colors.white : Colors.white54,
+                      width: isSelected ? 2 : 1,
                     ),
                   ),
+                  elevation: isSelected ? 5 : 0,
                 ),
-                 const Divider(height: 20),
-                Expanded(
-                  child: ListView.builder(
-          
-                    itemCount: filteredItems.length,
-                    itemBuilder: (context, index) {
-           
-                      final item = filteredItems[index];
-                      final bool canAfford =
-                          hunter.currentCoins >= item.shopPrice;
-
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: ListTile(
-                          leading: Icon(_getIconForItem(item),
-                              size: 40,
-                              color: const Color.fromARGB(255, 77, 167, 209)),
-                          title: Text(
-                            item.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                              '${item.description}\nPreço: ${item.shopPrice} Moedas'),
-                          trailing: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 29, 29, 29),
-                                foregroundColor: Colors.white),
-                            onPressed: (isLoading || !canAfford)
-                                ? null
-                                : () => _buyItem(context, item),
-                            child: Text(isLoading
-                                ? '...'
-                                : (canAfford ? 'Comprar' : 'Sem Ouro')),
-                          ),
-                        ),
-                      );
-                    },
+                child: Text(
+                  entry.value,
+                  // Usando o estilo de fonte pixelado
+                  style: _pixelStatValueStyle.copyWith(
+                    fontSize: 10,
+                    color: isSelected ? darkCardColor : Colors.white,
                   ),
                 ),
-              ],
+              ),
             );
-          },
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const goldColor = Colors.amber;
+
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: darkBackgroundColor,
+        appBarTheme: AppBarTheme(
+          backgroundColor: darkBackgroundColor,
+          titleTextStyle: GoogleFonts.pressStart2p(
+            fontSize: 14,
+            color: Colors.white,
+          ),
+          centerTitle: true,
+        ),
+      ),
+      child: WillPopScope(
+        onWillPop: () async {
+          Navigator.pop(context, _purchaseMade);
+          return true;
+        },
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Loja do Caçador')),
+          body: Consumer<HunterProvider>(
+            builder: (context, provider, child) {
+              final hunter = provider.hunter;
+              final shopItems = provider.shopItems;
+              final isLoading = provider.isLoading;
+
+              if (hunter == null) {
+                return const Center(
+                  child: Text('Erro ao carregar os dados do caçador.'),
+                );
+              }
+
+              final ShopFilter selectedFilter =
+                  _currentFilter; // Usando _currentFilter diretamente
+              final List<Item> filteredItems;
+
+              if (selectedFilter == ShopFilter.equipamentos) {
+                filteredItems = shopItems
+                    .where((item) => item.type == ItemType.Equipment)
+                    .toList();
+              } else if (selectedFilter == ShopFilter.itens) {
+                filteredItems = shopItems
+                    .where(
+                      (item) =>
+                          item.type == ItemType.Consumable ||
+                          item.type == ItemType.Material,
+                    )
+                    .toList();
+              } else {
+                filteredItems = shopItems;
+              }
+
+              return Column(
+                children: [
+                  // CONTAINER DE IMAGEM
+                  Container(
+                    height: 190,
+                    width: double.infinity,
+                    margin: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[900],
+                      borderRadius: BorderRadius.zero,
+                      image: const DecorationImage(
+                        image: AssetImage('assets/images/shop.gif'),
+                        fit: BoxFit.cover,
+                      ),
+                      border: Border.all(color: Colors.white54, width: 2),
+                    ),
+                  ),
+
+                  // MOEDAS
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          FontAwesomeIcons.coins,
+                          color: goldColor,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${hunter.currentCoins}G',
+                          style: GoogleFonts.pressStart2p(
+                            fontSize: 12,
+                            color: Colors.yellow,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // NOVO FILTRO DE BOTÕES PERSONALIZADO
+                  _buildFilterButtons(),
+
+                  const Divider(height: 20, color: Colors.white12),
+
+                  // Lista de Itens (Card com Botão Pixelado Restaurado)
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        final item = filteredItems[index];
+                        final bool canAfford =
+                            hunter.currentCoins >= item.shopPrice;
+
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          shape: const BeveledRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                            side: BorderSide(color: Colors.white24, width: 1),
+                          ),
+                          color:
+                              darkCardColor, // Usando darkCardColor para fundo do item
+                          child: ListTile(
+                            leading: Icon(
+                              _getIconForItem(item),
+                              size: 40,
+                              color: pixelPrimaryColor,
+                            ),
+                            title: Text(
+                              item.name,
+                              style: GoogleFonts.pressStart2p(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            subtitle: Text(
+                              '${item.description}\nPreço: ${item.shopPrice}G',
+                              style: GoogleFonts.pixelifySans(fontSize: 12),
+                            ),
+                            trailing: Container(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromARGB(
+                                    255,
+                                    29,
+                                    29,
+                                    29,
+                                  ),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 8,
+                                  ),
+                                  shape: const BeveledRectangleBorder(
+                                    borderRadius: BorderRadius.zero,
+                                    side: BorderSide(color: pixelPrimaryColor),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                onPressed: (isLoading || !canAfford)
+                                    ? null
+                                    : () => _buyItem(context, item),
+                                child: Text(
+                                  isLoading
+                                      ? '...'
+                                      : (canAfford ? 'COMPRAR' : 'SEM OURO'),
+                                  style: GoogleFonts.pressStart2p(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

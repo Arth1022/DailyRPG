@@ -1,127 +1,171 @@
 import 'package:dailyrpg/screens/inventory_screen.dart';
-import '../screens/craft_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/hunter_user.dart';
 import 'health_bar.dart';
 import 'xp_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-
-
 class HunterHeader extends StatelessWidget {
   final HunterUser hunter;
 
-  const HunterHeader({
-    super.key,
-    required this.hunter,
-  });
+  const HunterHeader({super.key, required this.hunter});
 
   @override
   Widget build(BuildContext context) {
+    // Definindo as cores e estilos do tema
+    const pixelPrimaryColor = Color.fromARGB(255, 77, 167, 209); // Azul Ciano
+    const darkCardColor = Color(0xff222222); // Fundo do Card
+    const goldColor = Colors.amber;
+    const hpColor = Color(0xFFE53935); // Vermelho da Vida
+    const xpColor = Color.fromARGB(255, 85, 166, 82); // Verde do XP
+
+    final pixelTitleStyle = GoogleFonts.pressStart2p(
+      fontSize: 14,
+      color: Colors.white,
+    );
+    final pixelLevelStyle = GoogleFonts.pressStart2p(
+      fontSize: 12,
+      color: xpColor,
+    );
+    final pixelGoldStyle = GoogleFonts.pressStart2p(
+      fontSize: 12,
+      color: goldColor,
+    );
+
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: Colors.grey[850],
-        borderRadius: BorderRadius.circular(12),
+        color: darkCardColor,
+        // Borda Pixelada: Chanfrada (Beveled) para o efeito de canto cortado
+        shape: BoxShape.rectangle,
+        border: Border.all(color: Colors.white24, width: 2),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(FontAwesomeIcons.userShield),
-              SizedBox(width: 14,),
-              Text(
-                "${hunter.hunterName}",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold
-                ),
-              )
-            ],
+          // IMAGEM DO CAÇADOR (HERÓI)
+          Container(
+            width: 135,
+            height: 200,
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              image: const DecorationImage(
+                image: AssetImage('assets/images/hero.gif'),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-          const Divider(height: 20),
-          SizedBox(height: 25,),
-          Row(
-            children: [
-              const Icon(
-                FontAwesomeIcons.heartPulse,
-                color: Color(0xFFE53935),
-                size: 25.0,
-              ),
-              const SizedBox(width: 10.0),
-              Expanded(
-                child: LifeBar(
-                  currentHp: hunter.currentHp,
-                  maxHp: hunter.maxHp,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20.0),
-          Row(
-            children: [
-              const Icon(
-                FontAwesomeIcons.diamond,
-                color: Color.fromARGB(255, 85, 166, 82),
-                size: 25.0,
-              ),
-              const SizedBox(width: 10.0),
-              Expanded(
-                child: XpProgressBar(
-                  currentXp: hunter.currentXp,
-                  nextLevelXp: hunter.nextLevelXp,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10.0),
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Row(
+
+          const SizedBox(width: 15.0),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  FontAwesomeIcons.book,
-                  color: Color.fromARGB(255, 11, 223, 21),
-                  size: 25.0,
-                ),
-                const SizedBox(width: 8.0),
-                Text(
-                  '${hunter.level}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color.fromARGB(255, 11, 223, 21),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 20.0),
-                const Icon(
-                  FontAwesomeIcons.coins,
-                  color: Colors.amber,
-                  size: 20,
-                ),
-                Text(
-                  ' ${hunter.currentCoins}G',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.amber,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(width: 150,),
-                IconButton(
-                  icon: const Icon(FontAwesomeIcons.layerGroup),
-                  iconSize: 30.0,
-                  color: Colors.grey[300],
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const InventoryScreen(),
+                // NOME DO CAÇADOR
+                Row(
+                  children: [
+                    const Icon(
+                      FontAwesomeIcons.userShield,
+                      color: pixelPrimaryColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        hunter.hunterName,
+                        style: pixelTitleStyle,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    );
-                  },
+                    ),
+                  ],
+                ),
+
+                // Divisor Estilizado
+                const Divider(height: 15, color: Colors.white12),
+
+                // BARRA DE VIDA (HP)
+                Row(
+                  children: [
+                    Icon(
+                      FontAwesomeIcons.heartPulse,
+                      color: hpColor,
+                      size: 20.0,
+                    ),
+                    const SizedBox(width: 10.0),
+                    Expanded(
+                      child: HealthBar(
+                        currentHp: hunter.currentHp,
+                        maxHp: hunter.maxHp,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10.0),
+
+                // BARRA DE EXPERIÊNCIA (XP)
+                Row(
+                  children: [
+                    Icon(FontAwesomeIcons.diamond, color: xpColor, size: 20.0),
+                    const SizedBox(width: 10.0),
+                    Expanded(
+                      child: XpBar(
+                        currentXp: hunter.currentXp,
+                        nextLevelXp: hunter.nextLevelXp,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10.0),
+
+                // STATS (NÍVEL E GOLD) E BOTÃO INVENTÁRIO
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Row(
+                    children: [
+                      // NÍVEL
+                      Icon(FontAwesomeIcons.book, color: xpColor, size: 20.0),
+                      const SizedBox(width: 8.0),
+                      Text('${hunter.level}', style: pixelLevelStyle),
+
+                      const SizedBox(width: 15.0),
+
+                      // GOLD
+                      Icon(FontAwesomeIcons.coins, color: goldColor, size: 18),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          ' ${hunter.currentCoins}G',
+                          style: pixelGoldStyle,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+
+                      // BOTÃO INVENTÁRIO
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: darkCardColor,
+
+                          shape: BoxShape.rectangle,
+                        ),
+                        child: IconButton(
+                          icon: const Icon(FontAwesomeIcons.layerGroup),
+                          iconSize: 20.0,
+                          color: Colors.white,
+                          padding: const EdgeInsets.all(6),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const InventoryScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
