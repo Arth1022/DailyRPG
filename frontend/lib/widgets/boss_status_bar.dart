@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/widgets/health_bar.dart';
 
@@ -26,15 +28,18 @@ class BossStatusBar extends StatelessWidget {
             children: [
               Text(
                 bossStatus.bossName,
-                style: const TextStyle(
-                  fontSize: 20,
+                style: GoogleFonts.pressStart2p(
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                   color: Color.fromARGB(255, 255, 255, 255),
                 ),
               ),
               Text(
-                'Nível: ${bossStatus.bossLevel}',
-                style: const TextStyle(fontSize: 16, color: Colors.white),
+                'LVL:${bossStatus.bossLevel}',
+                style: GoogleFonts.pressStart2p(
+                  fontSize: 13,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),

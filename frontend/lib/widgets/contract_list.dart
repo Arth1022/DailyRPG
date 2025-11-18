@@ -92,8 +92,8 @@ class ContractList extends StatelessWidget {
                   Expanded(child: Text(contract.title, style: pixelTitleStyle)),
                   IconButton(
                     icon: const Icon(
-                      FontAwesomeIcons.checkDouble,
-                      color: Colors.green,
+                      FontAwesomeIcons.squareCheck,
+                      color: Colors.white70,
                       size: 20,
                     ),
                     onPressed: isLoading

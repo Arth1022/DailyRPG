@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/widgets/boss_status_bar.dart';
-import 'package:google_fonts/google_fonts.dart'; // Para fontes pixeladas
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Para ícones temáticos
+import 'package:google_fonts/google_fonts.dart'; 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; 
 
 class ArenaScreen extends StatelessWidget {
   const ArenaScreen({super.key});
@@ -15,18 +15,15 @@ class ArenaScreen extends StatelessWidget {
   static const pixelPrimaryColor = Color.fromARGB(255, 77, 167, 209);
   static const xpColor = Color.fromARGB(255, 85, 166, 82);
   static const goldColor = Colors.amber;
-  static const bossRed = Color(0xFF8B0000); // Vermelho escuro para AppBar
+  static const bossRed = Color(0xFF8B0000); 
   // ------------------------
 
-  // Estilo para o texto do corpo
   TextStyle get _bodyTextStyle =>
       GoogleFonts.pixelifySans(fontSize: 14, color: Colors.white70);
 
-  // Estilo para o título do AppBar e cabeçalhos
   TextStyle get _pixelTitleStyle =>
       GoogleFonts.pressStart2p(fontSize: 14, color: Colors.white);
 
-  // Estilo de título secundário
   TextStyle get _sectionTitleStyle =>
       GoogleFonts.pressStart2p(fontSize: 10, color: pixelPrimaryColor);
 
@@ -45,7 +42,6 @@ class ArenaScreen extends StatelessWidget {
       ),
       body: Consumer<HunterProvider>(
         builder: (context, provider, child) {
-          // Supondo que bossStatus é do tipo BossStatus e tem rewardCoin/rewardXp
           final bossStatus = provider.bossStatus;
 
           if (bossStatus == null) {
@@ -116,7 +112,7 @@ class ArenaScreen extends StatelessWidget {
                             color: goldColor,
                           ),
                           title: Text(
-                            'Moedas (Gold)',
+                            'GOLD',
                             style: _bodyTextStyle.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -148,7 +144,7 @@ class ArenaScreen extends StatelessWidget {
                             color: xpColor,
                           ),
                           title: Text(
-                            'Experiência',
+                            'EXPERIÊNCIA',
                             style: _bodyTextStyle.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
