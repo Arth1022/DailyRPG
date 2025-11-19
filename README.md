@@ -1,18 +1,16 @@
 <div align="center">
 
-<img src="frontend/screens/Logopixelado.jpg" alt="Logo DailyRPG" width="200">
+<img src="frontend/screens/Logo.png" alt="Logo DailyRPG" width="250">
 
-⚔️ DailyRPG 🛡️
-Transforme suas tarefas diárias em uma aventura épica.
-Sobre | Funcionalidades | Instalação
+<h1>Transforme sua vida em um RPG.<h1/>
+  
 </div>
 
-📜 Sobre a Aventura
 DailyRPG não é apenas um gerenciador de tarefas; é o seu companheiro de batalha contra o monstro da procrastinação. Neste aplicativo, sua vida se torna um RPG onde cada tarefa concluída é um monstro derrotado, garantindo XP (Experiência) para subir de nível e Gold (Ouro) para comprar recompensas e aprimorar seu herói.
-
+ 
 Você é o herói da sua própria história. Seus hábitos ruins tiram sua vida (HP), enquanto seus bons hábitos o tornam lendário.
 
-📸 Grimório Visual (Screenshots)
+📸 Telas (Screenshots) <br/>
 Conheça as terras de DailyRPG, tela por tela:
 
 <div aling="center"><h2>HOME</h2></div>
@@ -23,7 +21,7 @@ Conheça as terras de DailyRPG, tela por tela:
 
 </div>
 
-O Centro de Comando: Aqui você visualiza o status atual do seu herói (HP e XP) e o seu saldo de Ouro. Logo abaixo, sua lista de contratos ativos (tarefas) espera por ação. É o ponto de partida da sua jornada diária.
+O Centro de Comando: Aqui você visualiza o status atual do seu herói (HP, XP, LVL) e o seu saldo de Ouro. Logo abaixo, sua lista de contratos ativos (tarefas) espera por ação. É o ponto de partida da sua jornada diária.
 
 <div aling="center"><h2>CONTRATOS</h2></div>
 <div align="center">
@@ -60,9 +58,10 @@ Recompensas: Use o Ouro que você ganhou com seu suor para comprar equipamentos 
 </div>
 
 Chefão: A representação visual da sua luta contra a procrastinação. Ao completar tarefas na vida real, seu herói ataca o Boss. Se deixar tarefas vencerem, é você quem sofre o dano.
-
-🎒 Arsenal de Funcionalidades
+<hr/>
+Funcionalidades: <br/>
 🗡️ Sistema de Contratos (Gerenciamento de Tasks)
+
 Criação de Missões: Adicione tarefas diárias, to-dos.
 
 Classificação de Dificuldade: Tarefas mais difíceis dão mais recompensas (XP e Gold).
@@ -86,16 +85,7 @@ Gold System: Ganhe moedas ao ser produtivo.
 
 Loja Personalizável: Compre itens no jogo (armaduras, espadas) ou crie recompensas personalizadas para você mesmo.
 
-🛠️ Forja e Ferramentas (Tecnologias)
-Este projeto foi forjado com as seguintes tecnologias arcanas:
-
-Linguagem: [C#/Dart]
-
-Framework: [Asp.NET/Flutter]
-
-Backend/Banco de Dados: [MySQL]
-
-Pixel Art: Não é original, todos os direitos reservados aos autores originais das imagens usadas no aplicativo.
+<hr/>
 
 🚀 Iniciando a Jornada (Instalação)
 
@@ -115,12 +105,26 @@ Push para a Branch (git push origin feature/NovaEspada).
 Abra um Pull Request.
 
 📜 Licença
-Este projeto está sob a licença MIT - veja o arquivo LICENSE para detalhes.
+Este projeto está sob a licença MIT - veja o arquivo LICENSE para detalhes. <br/>
+Pixel Art: Não é original, todos os direitos reservados aos autores originais das imagens usadas no aplicativo.
+
+<hr/>
 
 <div align="center">
 
-Feito com ⚔️ e ☕ por [Arthur Alexandre]
+Feito com ⚔️ e ☕ por -Arthur Alexandre-
 
-A aventura continua...
+(Tecnologias)
+
+</div>
+<div align="center">
+
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" height="78" alt="csharp logo"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dotnetcore/dotnetcore-original.svg" height="78" alt="dotnetcore logo"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg" height="78" alt="flutter logo"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" height="78" alt="mysql logo"  />
 
 </div>
