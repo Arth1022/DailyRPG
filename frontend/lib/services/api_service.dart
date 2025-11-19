@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import '../models/hunter_user.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../models/battle_state.dart';
 import '../models/boss_status.dart';
 import '../models/inventory_slot.dart';
 import '../models/item.dart';
@@ -391,6 +392,49 @@ class ApiService{
     } catch (e) {
       print('EXCEÇÃO [SpendPoint]: $e');
       throw Exception('Erro: $e');
+    }
+  }
+
+  //////Battle APIs//////
+  Future<BattleState> startBattle() async {
+    try {
+      final headers = await _getAuthHeaders();
+      
+      final response = await http.post(
+        Uri.parse('$_baseUrl/Battle/start'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return BattleState.fromJson(jsonDecode(response.body));
+      } else {
+        final body = jsonDecode(response.body);
+        throw Exception(body['message'] ?? 'Falha ao iniciar batalha (Code: ${response.statusCode})');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [Battle Start]: $e');
+      rethrow;
+    }
+  }
+
+Future<BattleState> performBattleAction(int sessionId, Map<String, dynamic> bodyData) async {    try {
+      final headers = await _getAuthHeaders();
+      
+      final response = await http.post(
+        Uri.parse('$_baseUrl/Battle/$sessionId/action'),
+        headers: headers,
+        body: jsonEncode(bodyData)
+      );
+
+      if (response.statusCode == 200) {
+        return BattleState.fromJson(jsonDecode(response.body));
+      } else {
+        print('ERRO API [Battle Action]: ${response.body}');
+        throw Exception('Falha na ação de batalha');
+      }
+    } catch (e) {
+      print('EXCEÇÃO [Battle Action]: $e');
+      rethrow;
     }
   }
 

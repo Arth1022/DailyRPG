@@ -10,6 +10,7 @@ import '../screens/add_contract_screen.dart';
 import '../screens/shop_screen.dart';
 import '../screens/craft_screen.dart';
 import '../screens/arena_screen.dart';
+import '../screens/battle_screen.dart';
 
 import '../providers/hunter_provider.dart';
 
@@ -27,6 +28,61 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) {
       context.read<HunterProvider>().loadInitialData();
     }
+  }
+
+  Future<bool> _showBattleConfirmation() async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: const Color.fromARGB(255, 40, 40, 40),
+              shape: const BeveledRectangleBorder(
+                side: BorderSide(color: Colors.white, width: 2),
+              ),
+              title: Text(
+                'ENTRAR NO CAMPO DE BATALHA?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.pressStart2p(
+                  fontSize: 12,
+                  color: Colors.redAccent,
+                ),
+              ),
+              content: Text(
+                'Você tem certeza que deseja iniciar o combate?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.pixelifySans(
+                  fontSize: 14,
+                  color: Colors.white70,
+                ),
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    'NÃO',
+                    style: GoogleFonts.pressStart2p(
+                      fontSize: 10,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(
+                    'SIM, LUTAR!',
+                    style: GoogleFonts.pressStart2p(
+                      fontSize: 10,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   Future<void> _navigateToAddContract(BuildContext context) async {
@@ -71,7 +127,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _onNavBarTapped(int index) {
+  Future<void> _navigateToBattle(BuildContext context) async {
+    // 1. Tenta iniciar a batalha no servidor
+    final success = await context.read<HunterProvider>().startPvPBattle();
+
+    if (success && context.mounted) {
+      // 2. Se sucesso, vai para a tela de luta
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const BattleScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Falha ao encontrar oponente! Tente novamente."),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _onNavBarTapped(int index) async {
     switch (index) {
       case 0:
         _refreshAllData();
@@ -83,8 +159,15 @@ class _HomeScreenState extends State<HomeScreen> {
         _navigateToArena(context);
         break;
       case 3:
-        _navigateToCrafting(context);
+        final bool confirm = await _showBattleConfirmation();
+        if (confirm && mounted) {
+          _navigateToBattle(context);
+        }
         break;
+      case 4:
+        _navigateToCrafting(context); 
+        break;
+      // -------------------------------------------------------
     }
   }
 
@@ -108,7 +191,6 @@ class _HomeScreenState extends State<HomeScreen> {
           centerTitle: true,
           elevation: 0,
         ),
-        // Adicionando um esquema de cores para manter o estilo dark
         colorScheme: const ColorScheme.dark().copyWith(
           primary: primaryPixelColor,
           onPrimary: Colors.black,
@@ -119,14 +201,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            "DAILY RPG", // Título em Caps lock para o estilo pressStart2p
-          ),
+          title: const Text("DAILY RPG"),
           actions: [
-            // Menu de Ações (PopupMenuButton)
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
-              color: appBarColor, // Fundo escuro para o menu
+              color: appBarColor,
               onSelected: (value) {
                 if (value == 'about') {
                   // Ação "Sobre"
@@ -157,8 +236,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+
+        // --- FAB PIXELADO ---
         floatingActionButton: Container(
-          // Container para a Borda Pixelada do FAB
           decoration: BoxDecoration(
             color: primaryPixelColor,
             border: Border.all(
@@ -166,74 +246,79 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 3,
             ),
             boxShadow: const [
-              // Sombra superior/esquerda (Luz)
               BoxShadow(
                 color: Color.fromARGB(255, 120, 200, 240),
                 offset: Offset(-2, -2),
                 blurRadius: 0,
-                spreadRadius: 0,
               ),
-              // Sombra inferior/direita (Sombra)
               BoxShadow(
                 color: Color.fromARGB(255, 30, 100, 130),
                 offset: Offset(2, 2),
                 blurRadius: 0,
-                spreadRadius: 0,
               ),
             ],
           ),
           child: FloatingActionButton(
             onPressed: () => _navigateToAddContract(context),
             tooltip: 'Novo Contrato',
-            backgroundColor: const Color.fromARGB(
-              255,
-              29,
-              29,
-              29,
-            ), // Cor interna do botão escura
+            backgroundColor: const Color.fromARGB(255, 29, 29, 29),
             foregroundColor: Colors.white,
-            elevation: 0, // Remover elevação padrão
+            elevation: 0,
             shape: const BeveledRectangleBorder(
               borderRadius: BorderRadius.zero,
-              side: BorderSide.none,
             ),
-            child: const Icon(FontAwesomeIcons.plus),
+            child: const Icon(FontAwesomeIcons.plus, size: 20),
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
+        // --- BARRA DE NAVEGAÇÃO ---
         bottomNavigationBar: BottomNavigationBar(
           onTap: _onNavBarTapped,
-          currentIndex: 0,
+          currentIndex: 0, // Mantém fixo no 0 pois é a Home
           type: BottomNavigationBarType.fixed,
           selectedItemColor: primaryPixelColor,
           unselectedItemColor: Colors.grey[600],
           backgroundColor: navBarColor,
-          items: [
-            const BottomNavigationBarItem(
+          selectedLabelStyle: GoogleFonts.pressStart2p(
+            fontSize: 8,
+          ), // Fonte pixelada
+          unselectedLabelStyle: GoogleFonts.pressStart2p(fontSize: 8),
+          items: const [
+            BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home_filled),
               label: 'INÍCIO',
             ),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(Icons.shopping_basket_outlined),
               activeIcon: Icon(Icons.shopping_basket),
               label: 'LOJA',
             ),
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.security_outlined),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.security_outlined), // Chefe PvE
               activeIcon: Icon(Icons.security),
               label: 'ARENA',
             ),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
+              icon: Icon(
+                FontAwesomeIcons.dungeon,
+              ), // PvP (Mudei o ícone para Dungeon)
+              activeIcon: Icon(FontAwesomeIcons.dungeon),
+              label: 'BATALHA',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.fireplace_outlined),
               activeIcon: Icon(Icons.fireplace),
               label: 'FORJA',
             ),
           ],
         ),
+
+        // --- CORPO DA TELA ---
         body: Consumer<HunterProvider>(
           builder: (context, provider, child) {
-            if (provider.isLoading) {
+            if (provider.isLoading && provider.hunter == null) {
               return const Center(child: CircularProgressIndicator());
             }
 
@@ -243,10 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.all(20.0),
                   child: Text(
                     'Erro ao carregar dados: ${provider.errorMessage}',
-                    style: GoogleFonts.pixelifySans(
-                      color: Colors.red,
-                      fontSize: 16,
-                    ),
+                    style: GoogleFonts.pixelifySans(color: Colors.red),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -255,29 +337,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
             final hunter = provider.hunter!;
 
-            // REMOÇÃO DO SafeArea e ajuste de Padding
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16),
-                  // HunterHeader (Assumimos que ele está estilizado)
-                  HunterHeader(hunter: hunter),
-                  const SizedBox(height: 24),
-                  // Título da Seção (Pixelado)
-                  Text(
-                    "SEUS CONTRATOS",
-                    style: GoogleFonts.pressStart2p(
-                      fontSize: 10, // Menor para encaixar
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+            // Recomendo manter o SafeArea para evitar cortes em telemóveis modernos
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16),
+
+                    HunterHeader(hunter: hunter),
+
+                    const SizedBox(height: 24),
+
+                    Text(
+                      "SEUS CONTRATOS",
+                      style: GoogleFonts.pressStart2p(
+                        fontSize: 12,
+                        color: primaryPixelColor, // Destaque na cor
+                      ),
                     ),
-                  ),
-                  const Divider(height: 20, color: Colors.white12),
-                  // Lista de Contratos (Já estilizada)
-                  const ContractList(),
-                ],
+                    const Divider(height: 20, color: Colors.white12),
+
+                    // Lista de Contratos (Ela usa Expanded internamente, então funciona aqui)
+                    const ContractList(),
+                  ],
+                ),
               ),
             );
           },

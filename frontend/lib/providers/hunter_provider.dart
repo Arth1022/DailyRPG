@@ -5,7 +5,9 @@ import '../models/item.dart';
 import '../models/inventory_slot.dart';
 import '../models/recipe.dart';
 import '../models/boss_status.dart';
+import '../models/battle_state.dart';
 import '../services/api_service.dart';
+
 
 class HunterProvider with ChangeNotifier {
 
@@ -15,7 +17,9 @@ class HunterProvider with ChangeNotifier {
   List<Item> _shopItems = []; 
   List<InventorySlot> _inventory = []; 
   List<Recipe> _recipes = []; 
-  BossStatus? _bossStatus; 
+  BossStatus? _bossStatus;
+  BattleState? _battleState;
+  BattleState? get battleState => _battleState; 
 
   bool _isLoading = false;
 
@@ -35,6 +39,56 @@ class HunterProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   bool get isAuthenticated => _hunter != null;
+
+  Future<bool> startPvPBattle() async {
+    _setLoading(true);
+    try {
+      _battleState = await _apiService.startBattle();
+      _setError(null);
+      _setLoading(false);
+      return true; 
+    } catch (e) {
+      _setError(e.toString());
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  Future<void> battleAction(String actionType, {String? moveId}) async {
+    if (_battleState == null) return;
+    
+
+
+    try {
+      final body = {
+        'actionType': actionType, 
+        if (moveId != null) 'moveId': moveId, 
+      };
+
+
+      final newState = await _apiService.performBattleAction(
+        _battleState!.sessionId, 
+        body 
+      );
+      
+      _battleState = newState;
+
+      if (newState.finished) {
+        _hunter = await _apiService.fetchHunterStats();
+      }
+
+      _setError(null);
+    } catch (e) {
+      _setError(e.toString());
+    } finally {
+      _setLoading(false); 
+    }
+  }
+
+  void clearBattle() {
+    _battleState = null;
+    _notify();
+  }
 
   Future<bool> login(String username, String password) async {
 
