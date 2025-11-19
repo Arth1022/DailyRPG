@@ -19,7 +19,7 @@ namespace DailyRpg.Controllers
             _context = context;
         }
 
-        [HttpGet]
+        [HttpGet("stats")]
         public async Task<IActionResult> GetHunterStats()
         {
             try

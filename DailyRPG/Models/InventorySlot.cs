@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace DailyRpg.Models
 {
@@ -11,6 +12,7 @@ namespace DailyRpg.Models
         [Required]
         public int HunterUserId { get; set; }
 
+        [JsonIgnore]
         [ForeignKey("HunterUserId")]
         public virtual HunterUser HunterUser { get; set; } = null!;
 
