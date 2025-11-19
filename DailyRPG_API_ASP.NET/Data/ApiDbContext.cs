@@ -46,6 +46,8 @@ namespace DailyRpg.Data
 
         public DbSet<Boss> Bosses { get; set; } = null!;
 
+        public DbSet<BattleSession> BattleSession {get;set;}
+
         
         
      } 

@@ -128,11 +128,11 @@ namespace DailyRpg.Controllers
 
                 if (hunter.XpDouble == true)
                 {
-                    totalXpGained += (contract.XpReward * bonus * 2);
+                    totalXpGained += contract.XpReward * bonus * 2;
                 }
                 else
                 {
-                    totalXpGained += (contract.XpReward * bonus);
+                    totalXpGained += contract.XpReward * bonus;
                 }
                 hunter.XpDouble = false; 
 
@@ -178,15 +178,14 @@ namespace DailyRpg.Controllers
                 hunter.CurrentCoins += totalCoinsGained;
 
 
-                while (hunter.CurrentXp >= hunter.NextLevelXp)
+                if (hunter.CurrentXp >= hunter.NextLevelXp)
                 {
-                    int xpNecessario = hunter.NextLevelXp; 
                     hunter.Level++; 
+                    
+                    int xpToLevelUp = hunter.NextLevelXp;
+
+                    hunter.CurrentXp -= xpToLevelUp; 
                     hunter.NextLevelXp += 200; 
-                    
-                  
-                    hunter.CurrentXp -= xpNecessario; 
-                    
                    
                     
                     hunter.CurrentHp = 100;

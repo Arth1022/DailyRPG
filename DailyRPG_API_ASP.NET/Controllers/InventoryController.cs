@@ -110,6 +110,26 @@ namespace DailyRpg.Controllers
                             }
                         }
                         break;
+                    case ItemType.Xp:
+                        if (hunter.XpDouble == false){
+                            hunter.XpDouble = true;
+                            if (hunter.CurrentHp > hunter.MaxHp)
+                            {
+                                hunter.CurrentHp = hunter.MaxHp;
+                            }
+                            
+                            slot.Quantity--;
+                            if (slot.Quantity <= 0)
+                            {
+                                _context.InventorySlots.Remove(slot);
+                            }
+                            message = $"Você usou {item.Name} e dobrou seu XP por um contrato.";
+                        }
+                        else
+                        {
+                            message = $"Você já esta dobrado!";
+                        }
+                        break;
                 }
 
                 await RecalculateStats(hunter);
