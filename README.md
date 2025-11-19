@@ -39,7 +39,7 @@ Assinando Missões: Nesta tela você cria novas tarefas. Defina o título da mis
 
 </div>
 
-O Combate: A representação visual da sua luta contra a procrastinação. Ao completar tarefas na vida real, seu herói ataca o inimigo na tela. Se deixar tarefas vencerem, é você quem sofre o dano.
+O Combate: Lute contra heróis de outros jogadores, ganhe XP e COINS ao derrota-los, teste sua classe contra a de outro player e que vença o melhor. O combate é uma mistura de POKEMON com D&D.
 
 <div aling="center"><h2>💰 A Loja do Caçador</h2></div>
 <div align="center">
