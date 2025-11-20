@@ -294,7 +294,7 @@ class ContractList extends StatelessWidget {
   Widget _buildAttributeBadge({
     required String label,
     required String value,
-    required Color decorationColor, // Usado apenas para a borda lateral
+    required Color decorationColor, 
     required TextStyle fontStyle,
     required TextStyle labelStyle,
   }) {

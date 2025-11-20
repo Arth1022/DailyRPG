@@ -12,6 +12,7 @@ class HunterUser {
   final int damage;
   final int defense;
   final int attributePoints;
+  final int currentStreak;
 
   final int strength;
   final int dexterity;
@@ -47,6 +48,7 @@ class HunterUser {
     required this.endurance,
     required this.userId,
     required this.xpDouble,
+    required this.currentStreak,
     
 
     this.equippedWeaponSlotId,
@@ -69,6 +71,7 @@ class HunterUser {
       damage: json['damage'] ?? 1,
       defense: json['defense'] ?? 0,
       attributePoints: json['attributePoints'] ?? 0,
+      currentStreak: json['currentStreak'] ?? 0,
       
       strength: json['strength'] ?? 0,
       dexterity: json['dexterity'] ?? 0,

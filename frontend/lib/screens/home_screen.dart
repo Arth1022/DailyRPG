@@ -1,3 +1,5 @@
+import 'package:dailyrpg/screens/guild_board_screen.dart'; // Verifique se o nome do arquivo é este (maiusculas/minusculas)
+import 'package:dailyrpg/screens/ranking_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -86,9 +88,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _navigateToAddContract(BuildContext context) async {
+    // Agora vai para o Quadro da Guilda em vez do formulário manual direto
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AddContractScreen()),
+      MaterialPageRoute(builder: (context) => const GuildBoardScreen()),
     );
     if (result == true && mounted) {
       _refreshAllData();
@@ -147,6 +150,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _navigateToRanking(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RankingScreen()),
+    );
+
+    if (result == true && mounted) {
+      _refreshAllData();
+    }
+  }
+
   void _onNavBarTapped(int index) async {
     switch (index) {
       case 0:
@@ -165,9 +179,10 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         break;
       case 4:
-        _navigateToCrafting(context); 
+        _navigateToCrafting(context);
+      case 5:
+        _navigateToRanking(context);
         break;
-      // -------------------------------------------------------
     }
   }
 
@@ -280,9 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
           selectedItemColor: primaryPixelColor,
           unselectedItemColor: Colors.grey[600],
           backgroundColor: navBarColor,
-          selectedLabelStyle: GoogleFonts.pressStart2p(
-            fontSize: 8,
-          ), // Fonte pixelada
+          selectedLabelStyle: GoogleFonts.pressStart2p(fontSize: 8),
           unselectedLabelStyle: GoogleFonts.pressStart2p(fontSize: 8),
           items: const [
             BottomNavigationBarItem(
@@ -296,14 +309,12 @@ class _HomeScreenState extends State<HomeScreen> {
               label: 'LOJA',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.security_outlined), // Chefe PvE
+              icon: Icon(Icons.security_outlined),
               activeIcon: Icon(Icons.security),
               label: 'ARENA',
             ),
             BottomNavigationBarItem(
-              icon: Icon(
-                FontAwesomeIcons.dungeon,
-              ), // PvP (Mudei o ícone para Dungeon)
+              icon: Icon(FontAwesomeIcons.dungeon),
               activeIcon: Icon(FontAwesomeIcons.dungeon),
               label: 'BATALHA',
             ),
@@ -311,6 +322,11 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.fireplace_outlined),
               activeIcon: Icon(Icons.fireplace),
               label: 'FORJA',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(FontAwesomeIcons.trophy),
+              activeIcon: Icon(FontAwesomeIcons.trophy),
+              label: 'RANK',
             ),
           ],
         ),
@@ -336,8 +352,8 @@ class _HomeScreenState extends State<HomeScreen> {
             }
 
             final hunter = provider.hunter!;
+            final bool hasStreak = hunter.currentStreak > 0;
 
-            // Recomendo manter o SafeArea para evitar cortes em telemóveis modernos
             return SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -348,18 +364,77 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     HunterHeader(hunter: hunter),
 
+                    const SizedBox(height: 12),
+
+                    // --- BARRA DE STREAK ---
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF252525),
+                        border: Border.all(
+                          color: hasStreak ? Colors.orange : Colors.grey[700]!,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                        boxShadow: hasStreak
+                            ? [
+                                BoxShadow(
+                                  color: Colors.orange.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  spreadRadius: 1,
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            FontAwesomeIcons.fire,
+                            color: hasStreak
+                                ? Colors.orangeAccent
+                                : Colors.grey,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            "COMBO DIÁRIO: ${hunter.currentStreak} ${hunter.currentStreak == 1 ? 'DIA' : 'DIAS'}",
+                            style: GoogleFonts.pressStart2p(
+                              fontSize: 10,
+                              color: hasStreak ? Colors.orange : Colors.grey,
+                            ),
+                          ),
+                          if (hasStreak) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              "(BÔNUS ATIVO!)",
+                              style: GoogleFonts.pixelifySans(
+                                fontSize: 10,
+                                color: Colors.greenAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                    // -----------------------
                     const SizedBox(height: 24),
 
                     Text(
                       "SEUS CONTRATOS",
                       style: GoogleFonts.pressStart2p(
                         fontSize: 12,
-                        color: primaryPixelColor, // Destaque na cor
+                        color: primaryPixelColor,
                       ),
                     ),
                     const Divider(height: 20, color: Colors.white12),
 
-                    // Lista de Contratos (Ela usa Expanded internamente, então funciona aqui)
                     const ContractList(),
                   ],
                 ),

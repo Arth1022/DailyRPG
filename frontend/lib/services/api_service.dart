@@ -9,6 +9,7 @@ import '../models/boss_status.dart';
 import '../models/inventory_slot.dart';
 import '../models/item.dart';
 import '../models/recipe.dart';
+import '../models/ranking.dart';
 
 class ApiService {
   final _storage = const FlutterSecureStorage();
@@ -139,6 +140,24 @@ class ApiService {
     } catch (e) {
       print('EXCEÇÃO [Contracts]: $e');
       throw Exception('Falha ao conectar ao servidor (Contracts): $e');
+    }
+  }
+  Future<List<Map<String, dynamic>>> fetchGuildBoard() async {
+    try {
+      final headers = await _getAuthHeaders();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/ContractsControllers/board'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => e as Map<String, dynamic>).toList();
+      }
+      return [];
+    } catch (e) {
+      print('Erro Board: $e');
+      return [];
     }
   }
 
@@ -463,5 +482,26 @@ class ApiService {
       print('EXCEÇÃO [Battle Action]: $e');
       rethrow;
     }
+  }
+  Future<List<RankingProfile>> fetchRanking() async {
+    try {
+      final headers = await _getAuthHeaders();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/Ranking'), // Rota do Controller novo
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => RankingProfile.fromJson(json)).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print('Erro Ranking: $e');
+      return [];
+    }
+      
+
   }
 }

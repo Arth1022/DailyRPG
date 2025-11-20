@@ -22,9 +22,7 @@ class HealthBar extends StatelessWidget {
     percentage = percentage.clamp(0.0, 1.0);
 
     return Container(
-      // Removido width fixo, pois o Expanded no HunterHeader já define a largura
       height: barHeight,
-      // Usando BoxShape.rectangle com borda definida para o visual pixelado
       decoration: BoxDecoration(
         color: hpBackgroundColor,
         border: Border.all(color: Colors.white54, width: 2),
@@ -33,14 +31,12 @@ class HealthBar extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Barra de preenchimento (Fill)
           FractionallySizedBox(
             alignment: Alignment.centerLeft,
             widthFactor: percentage,
             child: Container(
               decoration: const BoxDecoration(
                 color: hpFillColor,
-                // Adiciona uma sombra interna leve para profundidade (opcional)
                 boxShadow: [
                   BoxShadow(
                     color: Color.fromARGB(100, 0, 0, 0),
@@ -57,10 +53,9 @@ class HealthBar extends StatelessWidget {
           Center(
             child: Text(
               "$currentHp / $maxHp HP",
-              // Aplicando a fonte Press Start 2P
               style: GoogleFonts.pressStart2p(
                 color: Colors.white,
-                fontSize: 9.0, // Tamanho reduzido para caber
+                fontSize: 9.0, 
                 shadows: const [
                   Shadow(
                     color: Colors.black,

@@ -60,7 +60,7 @@ class HunterProvider with ChangeNotifier {
       final body = {
         'actionType': actionType,
         if (moveId != null) 'moveId': moveId,
-        if (itemId != null) 'itemId': itemId, 
+        if (itemId != null) 'itemId': itemId,
       };
 
       final newState = await _apiService.performBattleAction(
@@ -212,13 +212,10 @@ class HunterProvider with ChangeNotifier {
   Future<String> surrenderContract(int id) async {
     _setLoading(true);
     try {
-      // 1. Chama a API e recebe os dados (HP restante, mensagem)
       final result = await _apiService.surrenderContract(id);
 
-      // 2. Remove o contrato da lista local
       _contracts.removeWhere((contract) => contract.id == id);
 
-      // 3. ATUALIZA O HP DO CAÇADOR IMEDIATAMENTE
       if (_hunter != null && result.containsKey('remainingHp')) {
         _hunter = HunterUser(
           id: _hunter!.id,
@@ -229,9 +226,9 @@ class HunterProvider with ChangeNotifier {
           nextLevelXp: _hunter!.nextLevelXp,
           currentCoins: _hunter!.currentCoins,
 
-          // AQUI ESTÁ A MUDANÇA:
           currentHp: result['remainingHp'],
           maxHp: _hunter!.maxHp,
+          currentStreak: _hunter!.currentStreak,
 
           strength: _hunter!.strength,
           dexterity: _hunter!.dexterity,
@@ -249,7 +246,6 @@ class HunterProvider with ChangeNotifier {
 
       _setError(null);
 
-      // Retorna a mensagem para mostrar na tela (SnackBar)
       return result['message'] ?? "Contrato abandonado.";
     } catch (e) {
       _setError(e.toString());
