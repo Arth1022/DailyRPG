@@ -4,6 +4,7 @@ using DailyRpg.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DailyRPG.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251120052524_Limiter")]
+    partial class Limiter
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -403,7 +406,7 @@ namespace DailyRPG.Migrations
             modelBuilder.Entity("DailyRpg.Models.InventorySlot", b =>
                 {
                     b.HasOne("DailyRpg.Models.HunterUser", "HunterUser")
-                        .WithMany("InventorySlots")
+                        .WithMany()
                         .HasForeignKey("HunterUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -447,11 +450,6 @@ namespace DailyRPG.Migrations
                     b.Navigation("Material");
 
                     b.Navigation("Recipe");
-                });
-
-            modelBuilder.Entity("DailyRpg.Models.HunterUser", b =>
-                {
-                    b.Navigation("InventorySlots");
                 });
 
             modelBuilder.Entity("DailyRpg.Models.Recipe", b =>

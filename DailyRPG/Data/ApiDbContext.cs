@@ -29,6 +29,12 @@ namespace DailyRpg.Data
                 .WithMany()
                 .HasForeignKey(h => h.EquippedArmorSlotId) 
                 .OnDelete(DeleteBehavior.SetNull); 
+
+            modelBuilder.Entity<InventorySlot>()
+                .HasOne(slot => slot.HunterUser)          
+                .WithMany(hunter => hunter.InventorySlots)
+                .HasForeignKey(slot => slot.HunterUserId) 
+                .OnDelete(DeleteBehavior.Cascade);
         }
         public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
         {
@@ -48,6 +54,7 @@ namespace DailyRpg.Data
 
         public DbSet<BattleSession> BattleSession {get;set;}
 
+       
         
         
      } 

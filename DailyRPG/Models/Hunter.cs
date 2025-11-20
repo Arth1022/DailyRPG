@@ -21,15 +21,16 @@ namespace DailyRpg.Models
         //SKILLS////////////////////
         public int AttributePoints { get; set; } = 0;
 
-        public int Strength { get; set; } = 1;
-        public int Dexterity { get; set; } = 1;
-        public int Intelligence { get; set; } = 1;
-        public int Constitution { get; set; } = 1;
-        public int Endurance { get; set; } = 1;
+        public int Strength { get; set; } = 0;
+        public int Dexterity { get; set; } = 0;
+        public int Intelligence { get; set; } = 0;
+        public int Constitution { get; set; } = 0;
+        public int Endurance { get; set; } = 0;
 
 
         /// FIM SKILLL//////
 
+        public virtual ICollection<InventorySlot> InventorySlots { get; set; }
 
         public int? EquippedWeaponSlotId { get; set; } = null;
 

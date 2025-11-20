@@ -10,7 +10,7 @@ namespace DailyRpg.Models
         public string? Descricao { get; set; }
 
         [Required]
-        public string Difficult { get; set; } = string.Empty; 
+        public string Difficulty { get; set; } = ""; 
 
         [Required]
         public int XpReward { get; set; } 

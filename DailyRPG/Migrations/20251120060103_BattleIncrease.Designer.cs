@@ -4,6 +4,7 @@ using DailyRpg.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DailyRPG.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251120060103_BattleIncrease")]
+    partial class BattleIncrease
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -235,6 +238,9 @@ namespace DailyRPG.Migrations
                     b.Property<int>("HunterUserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("HunterUserId1")
+                        .HasColumnType("int");
+
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
@@ -244,6 +250,8 @@ namespace DailyRPG.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("HunterUserId");
+
+                    b.HasIndex("HunterUserId1");
 
                     b.HasIndex("ItemId");
 
@@ -403,10 +411,14 @@ namespace DailyRPG.Migrations
             modelBuilder.Entity("DailyRpg.Models.InventorySlot", b =>
                 {
                     b.HasOne("DailyRpg.Models.HunterUser", "HunterUser")
-                        .WithMany("InventorySlots")
+                        .WithMany()
                         .HasForeignKey("HunterUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("DailyRpg.Models.HunterUser", null)
+                        .WithMany("InventorySlots")
+                        .HasForeignKey("HunterUserId1");
 
                     b.HasOne("DailyRpg.Models.Item", "Item")
                         .WithMany()

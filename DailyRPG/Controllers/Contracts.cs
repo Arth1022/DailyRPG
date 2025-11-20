@@ -30,16 +30,56 @@ namespace DailyRpg.Controllers
                 (var hunterId, var error) = _getUserClaims();
                 if (error != null) return error;
 
+                // COOLDOWN DE CRIAÇÃO (5 Minutos) ---
+                var lastCreated = await _context.Contracts
+                    .Where(c => c.HunterUserId == hunterId)
+                    .OrderByDescending(c => c.StartDate)
+                    .FirstOrDefaultAsync();
+
+                if (lastCreated != null)
+                {
+                    var timeDiff = DateTime.UtcNow - lastCreated.StartDate;
+                    if (timeDiff.TotalMinutes < 5) // 5 Minutos para criar
+                    {
+                        int wait = 5 - (int)timeDiff.TotalMinutes;
+                        return BadRequest(new { message = $"A Guilda está ocupada. Aguarde {wait} minutos para solicitar um novo contrato." });
+                    }
+                }
+
+                // LIMITE DE SLOTS POR DIFICULDADE ---
+                string difficulty = contractDto.Difficulty?.ToLower() ?? "medium";
+                
+                // Conta quantos contratos ATIVOS (não completados) existem dessa dificuldade
+                int activeCount = await _context.Contracts
+                    .CountAsync(c => c.HunterUserId == hunterId && !c.IsCompleted && c.Difficulty == difficulty);
+
+                int maxAllowed = 0;
+                int xp = 0; 
+                int coin = 0;
+
+                switch (difficulty)
+                {
+                    case "easy":      maxAllowed = 3; xp = 50;  coin = 15;  break;
+                    case "medium":    maxAllowed = 2; xp = 100; coin = 40;  break;
+                    case "hard":      maxAllowed = 1; xp = 300; coin = 100; break;
+                    case "legendary": maxAllowed = 1; xp = 800; coin = 300; break;
+                    default:          maxAllowed = 2; xp = 100; coin = 40;  break;
+                }
+
+                if (activeCount >= maxAllowed)
+                {
+                    return BadRequest(new { message = $"Limite de contratos '{difficulty}' atingido ({activeCount}/{maxAllowed}). Conclua ou desista de um antes de criar outro." });
+                }
+
+                // --- CRIAÇÃO ---
                 var newContract = new Contract
                 {
-                    Id = 0,
                     Title = contractDto.Title,
                     Descricao = contractDto.Descricao,
-                    Difficult = contractDto.Difficult,
-                    XpReward = contractDto.XpReward,
-                    CoinReward = contractDto.CoinReward,
+                    Difficulty = difficulty,
+                    XpReward = xp,
+                    CoinReward = coin,
                     StartDate = DateTime.UtcNow,
-
                     IsCompleted = false,
                     HunterUserId = hunterId.Value
                 };
@@ -53,31 +93,6 @@ namespace DailyRpg.Controllers
             {
                 return StatusCode(500, $"Erro interno: {ex.Message}");
             }
-        }
-
-        [HttpGet("fail")]
-        public async Task<IActionResult> GetActiveContracts()
-        {
-            //Logica de Falha
-            var today = DateTime.UtcNow;
-            var hunter = await _context.StatsUser.FirstOrDefaultAsync();
-            var failedContracts = await _context.Contracts.Where(c => !c.IsCompleted && c.StartDate < today).ToListAsync();
-            bool hasFailed = false;
-            if (hunter != null && failedContracts.Any())
-            {
-                foreach (var contract in failedContracts)
-                {
-                    hunter.CurrentHp -= 33;
-                    contract.IsCompleted = true;
-                    hasFailed = true;
-                }
-                await _context.SaveChangesAsync();
-            }
-
-
-            var contracts = await _context.Contracts.Where(c => !c.IsCompleted).OrderBy(c => c.StartDate).ToListAsync();
-
-            return Ok(contracts);
         }
 
         [HttpGet("{id}")]
@@ -123,8 +138,8 @@ namespace DailyRpg.Controllers
                 string dropMessage = "";
 
                 int bonus = 1;
-                if (contract.Difficult == "Normal") { bonus = 2; }
-                else if (contract.Difficult == "Hard") { bonus = 3; }
+                if (contract.Difficulty == "Normal") { bonus = 2; }
+                else if (contract.Difficulty == "Hard") { bonus = 3; }
 
                 if (hunter.XpDouble == true)
                 {
@@ -278,30 +293,57 @@ namespace DailyRpg.Controllers
         [HttpPost("abandon/{id}")]
         public async Task<IActionResult> AbandonContract(int id)
         {
-            var contract = await _context.Contracts.FindAsync(id);
+            (var hunterId, var error) = _getUserClaims();
+            if (error != null) return error;
+
+            var contract = await _context.Contracts.FirstOrDefaultAsync(c => c.Id == id && c.HunterUserId == hunterId);
 
             if (contract == null)
             {
                 return NotFound(new { message = "Contrato não encontrado." });
             }
-            var hunter = await _context.StatsUser.FirstOrDefaultAsync();
+
+            var hunter = await _context.StatsUser.FindAsync(hunterId);
 
             if (hunter == null)
             {
                 return BadRequest(new { message = "Caçador não encontrado." });
             }
-            int hpPenalty = 10;
+
+            int hpPenalty = 0;
+            string difficulty = contract.Difficulty?.ToLower() ?? "medium";
+
+            switch (difficulty)
+            {
+                case "easy":
+                    hpPenalty = 5;
+                    break;
+                case "hard":
+                    hpPenalty = 25; 
+                    break;
+                case "legendary":
+                    hpPenalty = 60; // Penalidade severa
+                    break;
+                case "medium":
+                default:
+                    hpPenalty = 10;
+                    break;
+            }
+
             hunter.CurrentHp -= hpPenalty;
             if (hunter.CurrentHp < 0)
             {
                 hunter.CurrentHp = 0;
             }
+
             _context.Contracts.Remove(contract);
+            await _context.SaveChangesAsync();
 
             return Ok(new
             {
-                message = "Contrato abandonado com sucesso.",
-                penaltyApplied = hpPenalty
+                message = $"Contrato abandonado. Você sofreu {hpPenalty} de dano pela quebra de juramento.",
+                penaltyApplied = hpPenalty,
+                remainingHp = hunter.CurrentHp
             });
         }
     }
