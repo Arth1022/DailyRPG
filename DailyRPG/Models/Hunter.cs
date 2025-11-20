@@ -18,6 +18,10 @@ namespace DailyRpg.Models
         public int Damage { get; set; } = 1;
         public int Defense { get; set; } = 0;
 
+        public int CurrentStreak { get; set; } = 0;
+
+        public DateTime? LastActivityDate { get; set; }
+
         //SKILLS////////////////////
         public int AttributePoints { get; set; } = 0;
 
