@@ -10,13 +10,12 @@ import '../models/inventory_slot.dart';
 import '../models/item.dart';
 import '../models/recipe.dart';
 
-class ApiService{
-  
+class ApiService {
   final _storage = const FlutterSecureStorage();
   final String _tokenKey = 'jwt_token';
-  final String _baseUrl= "http://10.0.2.2:5164/api";
+  final String _baseUrl = "http://10.0.2.2:5164/api";
 
-  Future<void> _saveToken(String token) async{
+  Future<void> _saveToken(String token) async {
     await _storage.write(key: _tokenKey, value: token);
   }
 
@@ -25,11 +24,11 @@ class ApiService{
   }
 
   Future<void> logout() async {
-    await _storage.delete(key:_tokenKey);
+    await _storage.delete(key: _tokenKey);
   }
-  
+
   Future<Map<String, String>> _getAuthHeaders() async {
-    final token = await getToken(); 
+    final token = await getToken();
 
     if (token == null) {
       throw Exception('Token não encontrado. Faça o login novamente.');
@@ -37,23 +36,20 @@ class ApiService{
 
     return {
       'Content-Type': 'application/json; charset=UTF-8',
-      'Authorization': 'Bearer $token', 
+      'Authorization': 'Bearer $token',
     };
   }
 
   final Map<String, String> _publicHeaders = {
-    'Content-Type': 'application/json; charset=UTF-8'
+    'Content-Type': 'application/json; charset=UTF-8',
   };
-  
+
   Future<void> login(String username, String password) async {
     try {
       final response = await http.post(
         Uri.parse('$_baseUrl/Auth/login'),
         headers: _publicHeaders,
-        body: jsonEncode({
-          'username': username,
-          'password': password,
-        }),
+        body: jsonEncode({'username': username, 'password': password}),
       );
 
       if (response.statusCode == 200) {
@@ -62,13 +58,14 @@ class ApiService{
         await _saveToken(token);
         return;
       }
-      
-      if (response.statusCode == 401) {
-        throw Exception('Credenciais inválidas. Verifique o utilizador e a senha.');
-      }
-      
-      throw Exception('Falha no login (Code: ${response.statusCode})');
 
+      if (response.statusCode == 401) {
+        throw Exception(
+          'Credenciais inválidas. Verifique o utilizador e a senha.',
+        );
+      }
+
+      throw Exception('Falha no login (Code: ${response.statusCode})');
     } catch (e) {
       print('EXCEÇÃO [Login]: $e');
       throw Exception('Falha ao conectar ao servidor: $e');
@@ -78,31 +75,27 @@ class ApiService{
   Future<void> register(String username, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/Auth/register'), 
+        Uri.parse('$_baseUrl/Auth/register'),
         headers: _publicHeaders,
-        body: jsonEncode({
-          'username': username,
-          'password': password,
-        }),
+        body: jsonEncode({'username': username, 'password': password}),
       );
       if (response.statusCode == 201) {
         return;
       }
       if (response.statusCode == 400) {
-        throw Exception(response.body); 
+        throw Exception(response.body);
       }
       throw Exception('Falha no registo (Code: ${response.statusCode})');
-
     } catch (e) {
       print('EXCEÇÃO [Register]: $e');
       throw Exception('$e');
     }
   }
-  
+
   Future<HunterUser> fetchHunterStats() async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.get(
         Uri.parse('$_baseUrl/Hunter/stats'),
         headers: headers,
@@ -113,7 +106,9 @@ class ApiService{
       } else {
         print('ERRO API [Hunter]: Status Code = ${response.statusCode}');
         print('ERRO API [Hunter]: Body = ${response.body}');
-        throw Exception('Falha ao carregar os stats do caçador (StatusCode: ${response.statusCode})');
+        throw Exception(
+          'Falha ao carregar os stats do caçador (StatusCode: ${response.statusCode})',
+        );
       }
     } catch (e) {
       print('EXCEÇÃO [Hunter]: $e');
@@ -121,24 +116,25 @@ class ApiService{
     }
   }
 
-  Future<List<Contract>> fetchContracts() async{
+  Future<List<Contract>> fetchContracts() async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.get(
         Uri.parse('$_baseUrl/ContractsControllers/undone'),
         headers: headers,
       );
-      
-      if (response.statusCode == 200){
+
+      if (response.statusCode == 200) {
         print('JSON RESPOSTA [Contracts]: ${response.body}');
         final List<dynamic> jsonList = jsonDecode(response.body);
         return jsonList.map((jsonItem) => Contract.fromJson(jsonItem)).toList();
-      } 
-      else {
+      } else {
         print('ERRO API [Contracts]: Status Code = ${response.statusCode}');
         print('ERRO API [Contracts]: Body = ${response.body}');
-        throw Exception('Falha ao carregar contrato (StatusCode: ${response.statusCode})');
+        throw Exception(
+          'Falha ao carregar contrato (StatusCode: ${response.statusCode})',
+        );
       }
     } catch (e) {
       print('EXCEÇÃO [Contracts]: $e');
@@ -149,7 +145,7 @@ class ApiService{
   Future<HunterUser> completeContract(int id) async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.put(
         Uri.parse('$_baseUrl/ContractsControllers/$id/complete/'),
         headers: headers,
@@ -157,7 +153,6 @@ class ApiService{
       if (response.statusCode == 200 || response.statusCode == 204) {
         final dynamic body = jsonDecode(response.body);
         return HunterUser.fromJson(body['updateHunter']);
-
       } else {
         print('ERRO API [Complete]: Status Code = ${response.statusCode}');
         print('ERRO API [Complete]: Body = ${response.body}');
@@ -168,62 +163,65 @@ class ApiService{
       throw Exception('Falha ao conectar ao servidor (Complete)');
     }
   }
-  
-  Future<void> surrenderContract(int id) async {
-    try { 
+
+  Future<Map<String, dynamic>> surrenderContract(int id) async {
+    try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$_baseUrl/ContractsControllers/abandon/$id'),
         headers: headers,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 204){
-        return;
+      if (response.statusCode == 200) {
+        // Retorna o JSON do servidor (message, penaltyApplied, remainingHp)
+        return jsonDecode(response.body);
       } else {
         print('ERRO NA API [Surrender]: Status Code = ${response.statusCode}');
         print('ERRO NA API [Surrender]: Body = ${response.body}');
-        throw Exception('Falha ao abandonar o contrato');
+        final body = jsonDecode(response.body);
+        throw Exception(body['message'] ?? 'Falha ao abandonar o contrato');
       }
-    } catch (e) { 
+    } catch (e) {
       print('EXCEÇÃO [Surrender]: $e');
-      throw Exception('Falha ao conectar ao servidor (Surrender)');
+      rethrow;
     }
   }
 
-  Future<void> createContract(Map<String, dynamic> contractData) async{
-    try{
+  Future<void> createContract(Map<String, dynamic> contractData) async {
+    try {
       final headers = await _getAuthHeaders();
-      
-      final response =  await http.post(
+
+      final response = await http.post(
         Uri.parse('$_baseUrl/ContractsControllers'),
         headers: headers,
-        body: jsonEncode(contractData)
+        body: jsonEncode(contractData),
       );
-      
-      if (response.statusCode == 200 || response.statusCode == 201){
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return;
-      }
-      else{
+      } else {
         print('ERRO NA API [CREATE]: Status = ${response.statusCode}');
         print('ERRO NA API [CREATE]: Body = ${response.body}');
-        throw Exception('Falha ao criar o contrato (Code: ${response.statusCode})');
+        throw Exception(
+          'Falha ao criar o contrato (Code: ${response.statusCode})',
+        );
       }
-    }catch (e){
-      print ('Exceção [CREATE]: $e');
+    } catch (e) {
+      print('Exceção [CREATE]: $e');
       throw Exception('Erro: $e');
-    } 
+    }
   }
 
   Future<void> buyItem(int id) async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$_baseUrl/ShopControllers/buy/$id'),
         headers: headers,
       );
-      
+
       if (response.statusCode == 200 || response.statusCode == 204) {
         return;
       } else {
@@ -240,9 +238,9 @@ class ApiService{
   Future<List<Item>> fetchShopItems() async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.get(
-        Uri.parse('$_baseUrl/ShopControllers'), 
+        Uri.parse('$_baseUrl/ShopControllers'),
         headers: headers,
       );
 
@@ -259,13 +257,12 @@ class ApiService{
     }
   }
 
- 
   Future<List<InventorySlot>> fetchInventory() async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.get(
-        Uri.parse('$_baseUrl/inventory'), 
+        Uri.parse('$_baseUrl/inventory'),
         headers: headers,
       );
 
@@ -285,7 +282,7 @@ class ApiService{
   Future<HunterUser> useItem(int slotId) async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$_baseUrl/inventory/use/$slotId'),
         headers: headers,
@@ -307,37 +304,61 @@ class ApiService{
   Future<List<Recipe>> fetchRecipes() async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.get(
-        Uri.parse('$_baseUrl/crafting'), 
+        Uri.parse('$_baseUrl/Crafting'),
         headers: headers,
       );
 
+      // --- DEBUG: VER O QUE O SERVIDOR MANDA ---
+      print("STATUS CODE: ${response.statusCode}");
+      print("BODY CRAFT: ${response.body}");
+      // -----------------------------------------
+
       if (response.statusCode == 200) {
-        final List<dynamic> jsonList = jsonDecode(response.body);
-        return jsonList.map((json) => Recipe.fromJson(json)).toList();
+        // 1. Se o corpo for vazio ou string "null"
+        if (response.body.isEmpty || response.body == 'null') {
+          print("Aviso: API retornou corpo vazio ou nulo.");
+          return []; // Retorna lista vazia em vez de quebrar
+        }
+
+        final dynamic decodedData = jsonDecode(response.body);
+
+        // 2. Se o JSON decodificado for nulo
+        if (decodedData == null) {
+          return [];
+        }
+
+        // 3. VERIFICAÇÃO CRÍTICA: É uma lista?
+        if (decodedData is List) {
+          return decodedData.map((json) => Recipe.fromJson(json)).toList();
+        } else {
+          // Se não for lista, imprime o erro e retorna vazio para não crashar
+          print(
+            "ERRO CRÍTICO: A API não retornou uma Lista. Retornou: ${decodedData.runtimeType}",
+          );
+          return [];
+        }
       } else {
-        print('ERRO API [Craft GET]: ${response.body}');
-        throw Exception('Falha ao carregar as receitas');
+        print("Erro na API: ${response.statusCode}");
+        return []; // Retorna vazio em caso de erro de servidor
       }
     } catch (e) {
       print('EXCEÇÃO [Craft GET]: $e');
-      throw Exception('Erro: $e');
+      return []; // Retorna vazio na exceção para não travar o app
     }
   }
-
 
   Future<void> craftItem(int recipeId) async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.post(
-        Uri.parse('$_baseUrl/crafting/$recipeId'), 
+        Uri.parse('$_baseUrl/Crafting/$recipeId'),
         headers: headers,
       );
 
       if (response.statusCode == 200) {
-
         return;
       } else {
         print('ERRO API [Craft POST]: ${response.body}');
@@ -350,13 +371,12 @@ class ApiService{
     }
   }
 
-
   Future<BossStatus> fetchBossStatus() async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.get(
-        Uri.parse('$_baseUrl/Boss'), 
+        Uri.parse('$_baseUrl/Boss'),
         headers: headers,
       );
 
@@ -376,9 +396,9 @@ class ApiService{
   Future<HunterUser> spendAttributePoint(String skillName) async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.post(
-        Uri.parse('$_baseUrl/Hunter/spend-point/$skillName'), 
+        Uri.parse('$_baseUrl/Hunter/spend-point/$skillName'),
         headers: headers,
       );
 
@@ -399,7 +419,7 @@ class ApiService{
   Future<BattleState> startBattle() async {
     try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$_baseUrl/Battle/start'),
         headers: headers,
@@ -409,7 +429,10 @@ class ApiService{
         return BattleState.fromJson(jsonDecode(response.body));
       } else {
         final body = jsonDecode(response.body);
-        throw Exception(body['message'] ?? 'Falha ao iniciar batalha (Code: ${response.statusCode})');
+        throw Exception(
+          body['message'] ??
+              'Falha ao iniciar batalha (Code: ${response.statusCode})',
+        );
       }
     } catch (e) {
       print('EXCEÇÃO [Battle Start]: $e');
@@ -417,13 +440,17 @@ class ApiService{
     }
   }
 
-Future<BattleState> performBattleAction(int sessionId, Map<String, dynamic> bodyData) async {    try {
+  Future<BattleState> performBattleAction(
+    int sessionId,
+    Map<String, dynamic> bodyData,
+  ) async {
+    try {
       final headers = await _getAuthHeaders();
-      
+
       final response = await http.post(
         Uri.parse('$_baseUrl/Battle/$sessionId/action'),
         headers: headers,
-        body: jsonEncode(bodyData)
+        body: jsonEncode(bodyData),
       );
 
       if (response.statusCode == 200) {
@@ -437,7 +464,4 @@ Future<BattleState> performBattleAction(int sessionId, Map<String, dynamic> body
       rethrow;
     }
   }
-
 }
-
-

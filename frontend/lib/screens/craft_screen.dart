@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:akar_icons_flutter/akar_icons_flutter.dart';
-import 'package:google_fonts/google_fonts.dart'; // Import necessário
+import 'package:google_fonts/google_fonts.dart';
 import 'package:dailyrpg/models/enums.dart';
 
 import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/models/recipe.dart';
 import 'package:dailyrpg/models/inventory_slot.dart';
 
-enum CraftingFilter { todos, equipamentos, itens }
+enum CraftingFilter { equipamentos, itens }
 
 class CraftingScreen extends StatefulWidget {
   const CraftingScreen({super.key});
@@ -20,182 +20,169 @@ class CraftingScreen extends StatefulWidget {
 
 class _CraftingScreenState extends State<CraftingScreen> {
   bool _craftingAttempted = false;
+  CraftingFilter _currentFilter = CraftingFilter.equipamentos;
 
-  // Alterado para um único valor para corresponder à lógica do filtro de botões
-  CraftingFilter _currentFilter = CraftingFilter.todos;
+  // --- Lógica de Tema (Forja vs Alquimia) ---
+  bool get _isAlchemy => _currentFilter == CraftingFilter.itens;
 
-  // --- Estilos e Cores Pixelados ---
-  static const darkCardColor = Color.fromARGB(255, 40, 40, 40); // Fundo do Item
-  static const darkBackgroundColor = Color.fromARGB(
-    255,
-    30,
-    30,
-    30,
-  ); // Fundo da Tela
-  static const pixelAccentColor =
-      Colors.orange; // Cor de destaque da forja (Laranja/Fogo)
-  static const pixelButtonColor = Color.fromARGB(
-    255,
-    77,
-    167,
-    209,
-  ); // Cor primária (azul/aço)
+  // Paleta de Cores Clássica RPG (Medieval)
+  Color get _bgDark => const Color(0xFF1A1A1A); // Fundo geral escuro
+  Color get _woodDark => const Color(0xFF3E2723); // Madeira escura
+  Color get _woodMedium => const Color(0xFF5D4037); // Madeira média
+  Color get _metalDark => const Color(0xFF212121); // Metal/Ferro escuro
+  Color get _stoneDark => const Color(0xFF333333); // Pedra escura
+  Color get _goldColor => const Color(0xFFFFD700); // Dourado
 
-  TextStyle get _pixelTitleStyle =>
-      GoogleFonts.pressStart2p(fontSize: 14, color: Colors.white);
-  TextStyle get _pixelButtonTextStyle =>
-      GoogleFonts.pressStart2p(fontSize: 10, fontWeight: FontWeight.bold);
-  TextStyle get _pixelItemTitleStyle =>
-      GoogleFonts.pressStart2p(fontSize: 12, fontWeight: FontWeight.w400);
-  TextStyle get _pixelItemSubtitleStyle =>
-      GoogleFonts.pixelifySans(fontSize: 12);
+  // Cores Temáticas para Forja e Alquimia
+  Color get _forjaPrimary =>
+      const Color(0xFF8D6E63); // Marrom acinzentado de ferro/pedra
+  Color get _forjaAccent => const Color(0xFFD32F2F); // Vermelho fogo
+  Color get _forjaText => const Color(0xFFF5F5F5); // Cinza claro
 
-  static const Map<CraftingFilter, String> _craftingFilters = {
-    CraftingFilter.todos: 'TODOS',
-    CraftingFilter.equipamentos: 'EQUIPAMENTOS',
-    CraftingFilter.itens: 'ITENS',
-  };
-  // ------------------------------------
+  Color get _alchemyPrimary => const Color(0xFF6A1B9A); // Roxo profundo
+  Color get _alchemyAccent => const Color(0xFF8BC34A); // Verde claro (poção)
+  Color get _alchemyText => const Color(0xFFE0E0E0); // Cinza bem claro
 
-  String _buildIngredientsList(Recipe recipe) {
-    return recipe.ingredients
-        .map((ing) {
-          return '${ing.quantityRequired}x ${ing.material.name}';
-        })
-        .join(', ');
-  }
+  // Cores dinâmicas baseadas no filtro
+  Color get _themePrimary => _isAlchemy ? _alchemyPrimary : _forjaPrimary;
+  Color get _themeAccent => _isAlchemy ? _alchemyAccent : _forjaAccent;
+  Color get _themeText => _isAlchemy ? _alchemyText : _forjaText;
+  Color get _themeCardBg => _isAlchemy
+      ? _metalDark.withOpacity(0.8)
+      : _woodDark.withOpacity(0.8); // Fundo mais escuro/sólido para cards
 
+  // Ícone e Título do Cabeçalho
+  IconData get _headerIcon =>
+      _isAlchemy ? FontAwesomeIcons.flask : FontAwesomeIcons.hammer;
+
+  String get _headerTitle =>
+      _isAlchemy ? "MESA DE ALQUIMIA" : "FORJA DO FERREIRO";
+
+  // Estilos de texto
+  TextStyle get _rpgTitle =>
+      GoogleFonts.pressStart2p(fontSize: 12, color: Colors.white);
+  TextStyle get _rpgSubtitle =>
+      GoogleFonts.pressStart2p(fontSize: 9, color: Colors.white70);
+  TextStyle get _rpgBody => GoogleFonts.pixelifySans(
+    fontSize: 14,
+    color: Colors.white70,
+  ); // Mantendo pixelify para body por ser fácil de ler
+
+  // --- Métodos de Verificação ---
   bool _canCraft(Recipe recipe, List<InventorySlot> inventory) {
     for (var req in recipe.ingredients) {
-      bool found = false;
+      int currentQty = 0;
       for (var slot in inventory) {
         if (slot.item.id == req.material.id) {
-          if (slot.quantity >= req.quantityRequired) {
-            found = true;
-          }
+          currentQty = slot.quantity;
           break;
         }
       }
-      if (!found) return false;
+      if (currentQty < req.quantityRequired) return false;
     }
     return true;
   }
 
+  // Helper para verificar quantidade de um ingrediente específico
+  String _getIngredientStatus(
+    dynamic ingredient,
+    List<InventorySlot> inventory,
+  ) {
+    int currentQty = 0;
+    for (var slot in inventory) {
+      if (slot.item.id == ingredient.material.id) {
+        currentQty = slot.quantity;
+        break;
+      }
+    }
+    return "$currentQty/${ingredient.quantityRequired}";
+  }
+
   void _craftItem(BuildContext context, Recipe recipe) async {
     final provider = context.read<HunterProvider>();
-
     try {
       await provider.craftItem(recipe.id);
-      _craftingAttempted = true;
-
+      setState(() {
+        _craftingAttempted = true;
+      });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Você criou: ${recipe.itemCreated.name}!'),
-          backgroundColor: Colors.green,
+          content: Row(
+            children: [
+              const Icon(FontAwesomeIcons.check, color: Colors.white, size: 14),
+              const SizedBox(width: 10),
+              Text('CRIADO: ${recipe.itemCreated.name}!', style: _rpgSubtitle),
+            ],
+          ),
+          backgroundColor: Colors.green[800],
+          behavior: SnackBarBehavior.floating,
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Falha ao criar: ${provider.errorMessage}'),
-          backgroundColor: Colors.red,
+          content: Text('FALHA: ${provider.errorMessage}', style: _rpgBody),
+          backgroundColor: Colors.red[900],
         ),
       );
     }
   }
 
-  // Widget de Botões de Filtro Personalizado (semelhante ao da ShopScreen)
-  Widget _buildFilterButtons() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16.0, bottom: 10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: _craftingFilters.entries.map((entry) {
-            final isSelected = entry.key == _currentFilter;
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _currentFilter = entry.key; // Atualiza para o filtro único
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isSelected
-                      ? pixelAccentColor
-                      : darkCardColor,
-                  foregroundColor: isSelected ? darkCardColor : Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
-                  ),
-                  shape: BeveledRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                    side: BorderSide(
-                      color: isSelected ? Colors.white : Colors.white54,
-                      width: isSelected ? 2 : 1,
-                    ),
-                  ),
-                  elevation: isSelected ? 5 : 0,
-                ),
-                child: Text(
-                  entry.value,
-                  // Usando o estilo de fonte pixelado para o botão
-                  style: _pixelButtonTextStyle.copyWith(
-                    fontSize: 9, // Ajustado para o Row
-                    color: isSelected ? darkCardColor : Colors.white,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  // Função utilitária para obter o ícone do item criado (pode ser útil)
   IconData _getIconForItem(ItemType itemType, EquipmentType? equipType) {
     switch (itemType) {
       case ItemType.Consumable:
         return FontAwesomeIcons.flask;
       case ItemType.Equipment:
-        if (equipType == EquipmentType.Weapon) {
-          return AkarIcons.sword;
-        } else if (equipType == EquipmentType.Armor) {
-          return FontAwesomeIcons.shield;
-        }
-        return Icons.style;
+        if (equipType == EquipmentType.Weapon) return AkarIcons.sword;
+        if (equipType == EquipmentType.Armor)
+          return FontAwesomeIcons.shieldHalved;
+        return FontAwesomeIcons.hatWizard;
       case ItemType.Material:
-        return Icons.category;
+        return FontAwesomeIcons.gem;
       default:
-        return Icons.question_mark;
+        return FontAwesomeIcons.scroll;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: darkBackgroundColor,
-        appBarTheme: AppBarTheme(
-          backgroundColor: darkBackgroundColor,
-          titleTextStyle: _pixelTitleStyle,
-          centerTitle: true,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (bool didPop) {
+        if (didPop) return;
+        Navigator.pop(context, _craftingAttempted);
+      },
+      child: AnimatedTheme(
+        data: ThemeData.dark().copyWith(
+          scaffoldBackgroundColor: _bgDark,
+          colorScheme: ColorScheme.dark(
+            primary: _themePrimary,
+            secondary: _themeAccent,
+          ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: _woodDark, // AppBar de madeira escura
+            titleTextStyle: _rpgTitle.copyWith(fontSize: 14),
+            centerTitle: true,
+            elevation: 0,
+          ),
         ),
-      ),
-      child: PopScope(
-        canPop: false,
-        onPopInvoked: (bool didPop) {
-          if (didPop) return;
-          Navigator.pop(context, _craftingAttempted);
-        },
+        duration: const Duration(milliseconds: 300),
         child: Scaffold(
-          appBar: AppBar(title: const Text('Forja do Caçador')),
+          appBar: AppBar(
+            title: Text(_headerTitle),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(2.0),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                color: _themePrimary.withOpacity(
+                  0.7,
+                ), // Borda da AppBar com o tema
+                height: 2.0,
+              ),
+            ),
+          ),
           body: Consumer<HunterProvider>(
             builder: (context, provider, child) {
               final recipes = provider.recipes;
@@ -204,115 +191,66 @@ class _CraftingScreenState extends State<CraftingScreen> {
 
               if (recipes.isEmpty) {
                 return Center(
-                  child: Text(
-                    'Nenhuma receita encontrada.',
-                    style: _pixelItemTitleStyle.copyWith(fontSize: 10),
-                  ),
+                  child: Text('Sem conhecimento de receitas.', style: _rpgBody),
                 );
               }
 
-              final CraftingFilter selectedFilter = _currentFilter;
-              final List<Recipe> filteredRecipes;
-
-              if (selectedFilter == CraftingFilter.equipamentos) {
-                filteredRecipes = recipes.where((recipe) {
-                  return recipe.itemCreated.type == ItemType.Equipment;
-                }).toList();
-              } else if (selectedFilter == CraftingFilter.itens) {
-                filteredRecipes = recipes.where((recipe) {
-                  return recipe.itemCreated.type == ItemType.Consumable ||
-                      recipe.itemCreated.type == ItemType.Material;
-                }).toList();
-              } else {
-                filteredRecipes = recipes;
-              }
+              final filteredRecipes = _filterRecipes(recipes);
 
               return Column(
                 children: [
-                  // Filtro de Botões Personalizado
-                  _buildFilterButtons(),
+                  // 1. HEADER DE AMBIENTAÇÃO (BANCADA)
+                  _buildAtmosphereHeader(),
 
-                  const Divider(height: 20, color: Colors.white12),
+                  // 2. ABAS DE CATEGORIA
+                  _buildShelfTabs(),
 
+                  // 3. LISTA DE RECEITAS (LIVRO)
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: filteredRecipes.length,
-                      itemBuilder: (context, index) {
-                        final recipe = filteredRecipes[index];
-                        final item = recipe.itemCreated;
-
-                        final bool canCraft = _canCraft(recipe, inventory);
-                        final String ingredients = _buildIngredientsList(
-                          recipe,
-                        );
-
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: _woodDark, // Fundo da lista como madeira
+                        border: Border(
+                          left: BorderSide(
+                            color: _themePrimary.withOpacity(0.5),
+                            width: 4,
                           ),
-                          color: darkCardColor, // Aplicando cor pixelada
-                          shape: const BeveledRectangleBorder(
-                            borderRadius: BorderRadius.zero,
-                            side: BorderSide(
-                              color: Colors.white24,
-                              width: 1,
-                            ), // Borda pixelada
+                          right: BorderSide(
+                            color: _themePrimary.withOpacity(0.5),
+                            width: 4,
                           ),
-                          child: ListTile(
-                            leading: Icon(
-                              _getIconForItem(item.type, item.equipType),
-                              size: 40,
-                              color:
-                                  pixelAccentColor, // Cor de destaque da forja
-                            ),
-                            title: Text(
-                              item.name,
-                              style: _pixelItemTitleStyle, // Estilo pixelado
-                            ),
-                            subtitle: Text(
-                              'Cria: ${item.description}\nRequer: $ingredients',
-                              style: _pixelItemSubtitleStyle, // Estilo pixelado
-                            ),
-                            trailing: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  29,
-                                  29,
-                                  29,
-                                ), // Fundo escuro do botão
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 8,
-                                ),
-                                shape: const BeveledRectangleBorder(
-                                  borderRadius: BorderRadius.zero,
-                                  side: BorderSide(
-                                    color: pixelButtonColor,
-                                  ), // Borda pixelada
-                                ),
-                                elevation: 0,
-                              ),
-                              onPressed: (isLoading || !canCraft)
-                                  ? null
-                                  : () => _craftItem(context, recipe),
+                          bottom: BorderSide(
+                            color: _themePrimary.withOpacity(0.5),
+                            width: 4,
+                          ),
+                        ),
+                      ),
+                      child: filteredRecipes.isEmpty
+                          ? Center(
                               child: Text(
-                                isLoading
-                                    ? '...'
-                                    : (canCraft ? 'CRIAR' : 'FALTAM ITENS'),
-                                style: GoogleFonts.pressStart2p(
-                                  fontSize: 9, // Estilo pixelado
-                                  fontWeight: FontWeight.w300,
-                                ),
+                                "Nenhuma receita encontrada.",
+                                style: _rpgBody.copyWith(color: Colors.white38),
                               ),
+                            )
+                          : ListView.separated(
+                              padding: const EdgeInsets.all(12),
+                              itemCount: filteredRecipes.length,
+                              separatorBuilder: (ctx, i) =>
+                                  const SizedBox(height: 16),
+                              itemBuilder: (context, index) {
+                                return _buildRecipeCard(
+                                  context,
+                                  filteredRecipes[index],
+                                  inventory,
+                                  isLoading,
+                                );
+                              },
                             ),
-                          ),
-                        );
-                      },
                     ),
                   ),
+                  const SizedBox(height: 10),
                 ],
               );
             },
@@ -320,5 +258,296 @@ class _CraftingScreenState extends State<CraftingScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildAtmosphereHeader() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      height: 100,
+      width: double.infinity,
+      margin: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _themeCardBg, // Cor sólida para o header
+        border: Border.all(color: _themePrimary, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: _themePrimary.withOpacity(0.2),
+            blurRadius: 0,
+            spreadRadius: 2,
+            offset: const Offset(4, 4),
+          ),
+        ],
+        image: DecorationImage(
+          // Imagem de fundo para a atmosfera
+          image: AssetImage(
+            _isAlchemy ? 'assets/images/mage.png' : 'assets/images/forja.png',
+          ),
+          fit: BoxFit.cover,
+          opacity: 0.3,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            _headerIcon,
+            size: 40,
+            color: _themeAccent,
+          ), // Ícone com a cor de acento
+          const SizedBox(width: 20),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "MESA DE TRABALHO",
+                style: _rpgSubtitle.copyWith(
+                  fontSize: 8,
+                  color: Colors.white54,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _isAlchemy ? "Brumas e Essências..." : "Forja e Metal...",
+                style: _rpgTitle.copyWith(fontSize: 14, color: _themeAccent),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShelfTabs() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _buildTab(
+            FontAwesomeIcons.hammer,
+            "FORJA",
+            CraftingFilter.equipamentos,
+          ),
+          const SizedBox(width: 4),
+          _buildTab(FontAwesomeIcons.flask, "ALQUIMIA", CraftingFilter.itens),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTab(IconData icon, String label, CraftingFilter filter) {
+    final bool isSelected = _currentFilter == filter;
+
+    Color tabColor = filter == CraftingFilter.itens
+        ? _alchemyPrimary // Roxo para Alquimia
+        : _forjaPrimary; // Marrom acinzentado para Forja
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _currentFilter = filter),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          height: isSelected ? 45 : 35,
+          decoration: BoxDecoration(
+            color: isSelected ? tabColor : _woodMedium, // Abas de madeira
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+            border: Border.all(color: Colors.black, width: 1),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
+                    ),
+                  ]
+                : [],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected ? Colors.white : Colors.white54,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: _rpgSubtitle.copyWith(
+                  fontSize: 9,
+                  color: isSelected ? Colors.white : Colors.white54,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecipeCard(
+    BuildContext context,
+    Recipe recipe,
+    List<InventorySlot> inventory,
+    bool isLoading,
+  ) {
+    final item = recipe.itemCreated;
+    final bool canCraft = _canCraft(recipe, inventory);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _themeCardBg,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: canCraft ? _themeAccent.withOpacity(0.7) : Colors.white10,
+          width: 1,
+        ),
+        boxShadow: canCraft
+            ? [BoxShadow(color: _themeAccent.withOpacity(0.1), blurRadius: 8)]
+            : [],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: Colors.black54,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: canCraft ? _themeAccent : Colors.grey),
+            ),
+            child: Icon(
+              _getIconForItem(item.type, item.equipType),
+              size: 30,
+              color: canCraft ? _themeAccent : Colors.grey,
+            ),
+          ),
+
+          const SizedBox(width: 16),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  item.name,
+                  style: _rpgTitle.copyWith(fontSize: 12, color: _themeText),
+                ),
+                const SizedBox(height: 10),
+
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: recipe.ingredients.map((ing) {
+                    final status = _getIngredientStatus(ing, inventory);
+                    final parts = status.split('/');
+                    final hasEnough =
+                        int.parse(parts[0]) >= int.parse(parts[1]);
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(2),
+                        border: Border.all(
+                          color: hasEnough
+                              ? Colors.green[800]!
+                              : Colors.red[900]!,
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        "${ing.material.name}: $status",
+                        style: _rpgBody.copyWith(
+                          fontSize: 11,
+                          color: hasEnough
+                              ? Colors.greenAccent
+                              : Colors.redAccent,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 40,
+                  width: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: canCraft
+                          ? _themePrimary
+                          : Colors.grey[800],
+                      foregroundColor: Colors.white,
+                      elevation: canCraft ? 4 : 0,
+                      shape: const BeveledRectangleBorder(),
+                      padding: EdgeInsets.zero,
+                    ),
+                    onPressed: (isLoading || !canCraft)
+                        ? null
+                        : () => _craftItem(context, recipe),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 12,
+                            height: 12,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Icon(
+                            _isAlchemy
+                                ? FontAwesomeIcons.flaskVial
+                                : FontAwesomeIcons.hammer,
+                            size: 16,
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                if (canCraft)
+                  Text(
+                    "CRIAR",
+                    style: _rpgSubtitle.copyWith(
+                      fontSize: 8,
+                      color: _themeAccent,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Recipe> _filterRecipes(List<Recipe> recipes) {
+    if (_currentFilter == CraftingFilter.equipamentos) {
+      return recipes
+          .where((r) => r.itemCreated.type == ItemType.Equipment)
+          .toList();
+    } else {
+      return recipes
+          .where(
+            (r) =>
+                r.itemCreated.type == ItemType.Consumable ||
+                r.itemCreated.type == ItemType.Material,
+          )
+          .toList();
+    }
   }
 }

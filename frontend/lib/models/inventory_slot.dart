@@ -4,7 +4,7 @@ import 'item.dart';
 class InventorySlot {
 
   final int id;        
-  final int quantity; 
+   int quantity; 
 
   final Item item;
 

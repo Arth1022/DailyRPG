@@ -16,45 +16,37 @@ class InventoryScreen extends StatefulWidget {
 }
 
 class _InventoryScreenState extends State<InventoryScreen> {
-  // --- Variável de Estado para o Filtro ---
   ItemType? _selectedFilter;
 
-  // Mapa de filtros (ItemType, Rótulo) com apenas 3 opções
   static const Map<ItemType?, String> _itemFilters = {
     null: 'TUDO',
-    ItemType.Equipment: 'EQUIPAMENTOS',
-    ItemType.Material: 'MATERIAIS',
-    // ItemType.Consumable e ItemType.XP foram removidos
+    ItemType.Equipment: 'EQUIP.',
+    ItemType.Material: 'ITEMS',
   };
-  // ------------------------------------------
 
-  // --- Definições de Estilo (MANTIDAS) ---
-  static const darkBackground = Color(0xFF1A1A1A);
-  static const darkCardColor = Color(0xff2a2a2a);
-  static const pixelPrimaryColor = Color.fromARGB(255, 77, 167, 209);
+  // --- CORES E ESTILOS ---
+  static const darkBackground = Color(0xFF121212); // Fundo quase preto
+  static const panelColor = Color(0xFF1E1E1E); // Cinza escuro para painéis
+  static const pixelPrimaryColor = Color(0xFF4DA7D1); // Ciano
+  static const goldColor = Color(0xFFFFD700); // Dourado para itens equipados
+  static const accentRed = Color(0xFFFF5555);
+  static const accentGreen = Color(0xFF55FF55);
 
-  // Cores dos Atributos
-  static Color strengthColor = Colors.red[400]!;
-  static Color dexterityColor = Colors.yellow[400]!;
-  static Color intelligenceColor = const Color.fromARGB(255, 81, 245, 66);
-  static Color constitutionColor = Colors.blue[400]!;
-  static Color enduranceColor = Colors.grey[400]!;
-  // -----------------------------
+  // Cores Atributos
+  final Color strColor = const Color(0xFFFF4444);
+  final Color dexColor = const Color(0xFFFFEB3B);
+  final Color intColor = const Color(0xFF00E676);
+  final Color conColor = const Color(0xFF2979FF);
+  final Color endColor = const Color(0xFFB0BEC5);
 
   TextStyle get _pixelTitleStyle =>
       GoogleFonts.pressStart2p(fontSize: 12, color: Colors.white);
 
-  TextStyle get _pixelSubtitleStyle =>
+  TextStyle get _pixelBodyStyle =>
       GoogleFonts.pixelifySans(fontSize: 14, color: Colors.white70);
 
-  TextStyle get _pixelStatValueStyle =>
-      GoogleFonts.pressStart2p(fontSize: 12, fontWeight: FontWeight.bold);
-
-  TextStyle get _pixelStatLabelStyle => GoogleFonts.pixelifySans(
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-    color: Colors.white,
-  );
+  TextStyle get _pixelValueStyle =>
+      GoogleFonts.pressStart2p(fontSize: 12, color: Colors.white);
 
   @override
   void initState() {
@@ -64,7 +56,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
     });
   }
 
-  // Mapeamento de Ícones (MANTIDO)
   IconData _getIconForItem(Item item) {
     switch (item.type) {
       case ItemType.XP:
@@ -72,45 +63,27 @@ class _InventoryScreenState extends State<InventoryScreen> {
       case ItemType.Consumable:
         return FontAwesomeIcons.flask;
       case ItemType.Equipment:
-        if (item.equipType == EquipmentType.Weapon) {
-          return AkarIcons.sword;
-        } else if (item.equipType == EquipmentType.Armor) {
+        if (item.equipType == EquipmentType.Weapon) return AkarIcons.sword;
+        if (item.equipType == EquipmentType.Armor)
           return FontAwesomeIcons.shirt;
-        }
         return FontAwesomeIcons.hatWizard;
       case ItemType.Material:
         return FontAwesomeIcons.gem;
       default:
-        return FontAwesomeIcons.question;
+        return FontAwesomeIcons.boxOpen;
     }
   }
 
+  // Lógica de Uso (Mantida)
   void _useItem(BuildContext context, int slotId) async {
     final provider = context.read<HunterProvider>();
-
     try {
       await provider.useItem(slotId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Ação realizada com sucesso!',
-            style: _pixelSubtitleStyle.copyWith(fontSize: 10),
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
+      _showFeedback(context, 'Item utilizado!', Colors.green);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Falha ao usar o item: ${provider.errorMessage}',
-            style: _pixelSubtitleStyle.copyWith(fontSize: 10),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showFeedback(context, 'Erro: ${provider.errorMessage}', Colors.red);
     }
   }
 
@@ -119,134 +92,21 @@ class _InventoryScreenState extends State<InventoryScreen> {
     try {
       await provider.spendAttributePoint(skillName);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Você aumentou $skillName!',
-            style: _pixelSubtitleStyle.copyWith(fontSize: 10),
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
+      _showFeedback(context, '$skillName aumentado!', Colors.green);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Falha ao gastar ponto: ${provider.errorMessage}',
-            style: _pixelSubtitleStyle.copyWith(fontSize: 10),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showFeedback(context, 'Erro: ${provider.errorMessage}', Colors.red);
     }
   }
 
-  // Widget _buildStatRow (MANTIDO)
-  Widget _buildStatRow(
-    BuildContext context,
-    HunterProvider provider,
-    String label,
-    String skillName,
-    int statValue,
-    IconData icon,
-    Color color,
-  ) {
-    final bool canSpend = provider.hunter!.attributePoints > 0;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 22),
-              const SizedBox(width: 15),
-              SizedBox(
-                width: 120,
-                child: Text(label, style: _pixelStatLabelStyle),
-              ),
-              const SizedBox(width: 15),
-              Text(
-                statValue.toString(),
-                style: _pixelStatValueStyle.copyWith(color: color),
-              ),
-            ],
-          ),
-          if (canSpend)
-            Container(
-              decoration: BoxDecoration(
-                color: darkCardColor,
-                border: Border.all(color: Colors.white54, width: 1),
-                shape: BoxShape.rectangle,
-              ),
-              child: IconButton(
-                icon: const Icon(FontAwesomeIcons.plus, color: Colors.green),
-                iconSize: 16,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: provider.isLoading
-                    ? null
-                    : () => _spendPoint(context, skillName),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  // WIDGET PARA OS BOTÕES DE FILTRO (AGORA CENTRALIZADO)
-  Widget _buildFilterButtons() {
-    // Substituído SingleChildScrollView por Center
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 10.0),
-        child: Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center, // Centraliza os botões dentro do Row
-          mainAxisSize: MainAxisSize.min, // Faz a Row ocupar o mínimo de espaço
-          children: _itemFilters.entries.map((entry) {
-            final isSelected = entry.key == _selectedFilter;
-            return Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 4.0,
-              ), // Ajuste de padding
-              child: ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _selectedFilter = entry.key;
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isSelected
-                      ? pixelPrimaryColor
-                      : darkCardColor,
-                  foregroundColor: isSelected ? darkCardColor : Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
-                  ),
-                  shape: BeveledRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                    side: BorderSide(
-                      color: isSelected ? Colors.white : Colors.white54,
-                      width: isSelected ? 2 : 1,
-                    ),
-                  ),
-                  elevation: isSelected ? 5 : 0,
-                ),
-                child: Text(
-                  entry.value,
-                  style: _pixelStatValueStyle.copyWith(
-                    fontSize: 10,
-                    color: isSelected ? darkCardColor : Colors.white,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
+  void _showFeedback(BuildContext context, String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: _pixelBodyStyle.copyWith(fontSize: 12)),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        shape: const BeveledRectangleBorder(),
+        margin: const EdgeInsets.all(10),
       ),
     );
   }
@@ -256,13 +116,17 @@ class _InventoryScreenState extends State<InventoryScreen> {
     return Scaffold(
       backgroundColor: darkBackground,
       appBar: AppBar(
-        backgroundColor: darkCardColor,
+        backgroundColor: darkBackground,
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          'INVENTÁRIO',
+          'PERSONAGEM',
           style: _pixelTitleStyle.copyWith(fontSize: 16),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: Colors.white24, height: 1.0),
         ),
       ),
       body: Consumer<HunterProvider>(
@@ -273,275 +137,467 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
           if (hunter == null) {
             return Center(
-              child: Text(
-                'ERRO: CAÇADOR NÃO ENCONTRADO.',
-                style: _pixelSubtitleStyle,
-                textAlign: TextAlign.center,
-              ),
+              child: Text('Carregando dados...', style: _pixelBodyStyle),
             );
           }
 
-          // --- LÓGICA DE FILTRAGEM ---
+          // Filtragem
           final filteredInventory = inventory.where((slot) {
-            if (_selectedFilter == null) {
-              return true; // Mostrar todos
-            }
-
+            if (_selectedFilter == null) return true;
             if (_selectedFilter == ItemType.Equipment) {
               return slot.item.type == ItemType.Equipment;
             }
-
-            // Filtro Material inclui Material, Consumível e XP
             if (_selectedFilter == ItemType.Material) {
               return slot.item.type != ItemType.Equipment;
             }
-
             return slot.item.type == _selectedFilter;
           }).toList();
-          // ------------------------------------
 
           return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // --- SEÇÃO DE ATRIBUTOS (MANTIDA) ---
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16.0),
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: darkCardColor,
-                      border: Border.all(color: pixelPrimaryColor, width: 2),
-                      shape: BoxShape.rectangle,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "ATRIBUTOS",
-                              style: _pixelTitleStyle.copyWith(fontSize: 14),
-                            ),
-                            if (hunter.attributePoints > 0)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.2),
-                                  border: Border.all(
-                                    color: Colors.green,
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  "${hunter.attributePoints} PTs",
-                                  style: _pixelStatValueStyle.copyWith(
-                                    fontSize: 10,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const Divider(height: 20, color: Colors.white12),
-                        _buildStatRow(
-                          context,
-                          provider,
-                          'Força',
-                          'strength',
-                          hunter.strength,
-                          FontAwesomeIcons.gavel,
-                          strengthColor,
-                        ),
-                        _buildStatRow(
-                          context,
-                          provider,
-                          'Destreza',
-                          'dexterity',
-                          hunter.dexterity,
-                          FontAwesomeIcons.bolt,
-                          dexterityColor,
-                        ),
-                        _buildStatRow(
-                          context,
-                          provider,
-                          'Inteligência',
-                          'intelligence',
-                          hunter.intelligence,
-                          FontAwesomeIcons.brain,
-                          intelligenceColor,
-                        ),
-                        _buildStatRow(
-                          context,
-                          provider,
-                          'Constituição',
-                          'constitution',
-                          hunter.constitution,
-                          FontAwesomeIcons.heart,
-                          constitutionColor,
-                        ),
-                        _buildStatRow(
-                          context,
-                          provider,
-                          'Vigor',
-                          'endurance',
-                          hunter.endurance,
-                          FontAwesomeIcons.handHoldingMedical,
-                          enduranceColor,
-                        ),
-                        const Divider(height: 20, color: Colors.white12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text(
-                              'Dano: ${hunter.damage}',
-                              style: _pixelSubtitleStyle.copyWith(fontSize: 12),
-                            ),
-                            Text(
-                              'HP: ${hunter.currentHp}/${hunter.maxHp}',
-                              style: _pixelSubtitleStyle.copyWith(fontSize: 12),
-                            ),
-                            Text(
-                              'Defesa: ${hunter.defense}',
-                              style: _pixelSubtitleStyle.copyWith(fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. FICHA DE PERSONAGEM (STATUS HEADER)
+                _buildCharacterSheet(context, provider, hunter),
 
-                  // --- TÍTULO DA MOCHILA ---
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 4.0,
-                      right: 4.0,
-                      bottom: 8.0,
+                const SizedBox(height: 24),
+
+                // 2. TÍTULO E FILTROS
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('MOCHILA', style: _pixelTitleStyle),
+                    Text(
+                      '${filteredInventory.length} ITEMS',
+                      style: _pixelBodyStyle.copyWith(
+                        fontSize: 10,
+                        color: Colors.white54,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildFilterBar(),
+                const SizedBox(height: 16),
+
+                // 3. LISTA DE ITENS (Grid/Lista Visual)
+                if (filteredInventory.isEmpty)
+                  Container(
+                    height: 100,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.white12,
+                        style: BorderStyle.solid,
+                      ),
                     ),
                     child: Text(
-                      'MOCHILA',
-                      style: _pixelTitleStyle.copyWith(fontSize: 14),
+                      "Vazio...",
+                      style: _pixelBodyStyle.copyWith(color: Colors.white24),
                     ),
-                  ),
-
-                  // --- FILTRO DE BOTÕES (CENTRALIZADO) ---
-                  _buildFilterButtons(),
-                  // ------------------------------
-
-                  // Lista de Itens (usando a lista filtrada)
+                  )
+                else
                   ...filteredInventory.map((slot) {
-                    final item = slot.item;
-                    final bool isEquipped =
-                        (hunter.equippedWeaponSlotId == slot.id) ||
-                        (hunter.equippedArmorSlotId == slot.id);
-
-                    String buttonText;
-                    Color buttonColor;
-                    bool canBeUsed = true;
-
-                    // Lógica para Consumível e XP (agora sob o filtro 'Materiais')
-                    if (item.type == ItemType.Equipment) {
-                      if (isEquipped) {
-                        buttonText = 'DESEQUIPAR';
-                        buttonColor = const Color(0xFF6A1B9A);
-                      } else {
-                        buttonText = 'EQUIPAR';
-                        buttonColor = pixelPrimaryColor;
-                      }
-                    } else if (item.type == ItemType.Consumable) {
-                      buttonText = 'USAR';
-                      buttonColor = Colors.green[600]!;
-                    } else if (item.type == ItemType.XP) {
-                      // Se for XP, o botão deve ser USAR também, se a lógica permitir
-                      buttonText = 'USAR XP';
-                      buttonColor = Colors.yellow[600]!;
-                    } else {
-                      // ItemType.Material
-                      buttonText = 'MATERIAL';
-                      canBeUsed = false;
-                      buttonColor = Colors.grey[700]!;
-                    }
-
-                    return Card(
-                      color: darkCardColor,
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 4,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                        side: BorderSide(
-                          color: isEquipped ? Colors.yellow : Colors.white24,
-                          width: isEquipped ? 2 : 1,
-                        ),
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          _getIconForItem(item),
-                          size: 30,
-                          color: Colors.white,
-                        ),
-                        title: Text(
-                          item.name,
-                          style: _pixelStatLabelStyle.copyWith(
-                            color: isEquipped ? Colors.yellow : Colors.white,
-                          ),
-                        ),
-                        subtitle: Text(
-                          'Qtd: ${slot.quantity}\n${item.description}',
-                          style: _pixelSubtitleStyle.copyWith(fontSize: 12),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: buttonColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            shape: const BeveledRectangleBorder(
-                              borderRadius: BorderRadius.zero,
-                            ),
-                          ),
-                          onPressed: (isLoading || !canBeUsed)
-                              ? null
-                              : () => _useItem(context, slot.id),
-                          child: Text(
-                            buttonText,
-                            style: _pixelStatValueStyle.copyWith(fontSize: 8),
-                          ),
-                        ),
-                      ),
+                    return _buildInventorySlot(
+                      context,
+                      slot,
+                      hunter,
+                      isLoading,
                     );
                   }).toList(),
 
-                  // Se a lista filtrada estiver vazia
-                  if (filteredInventory.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: Center(
-                        child: Text(
-                          _selectedFilter == null
-                              ? 'O INVENTÁRIO ESTÁ VAZIO.'
-                              : 'NENHUM ITEM DO TIPO SELECIONADO.',
-                          style: _pixelSubtitleStyle.copyWith(fontSize: 12),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+                // Espaço extra no final para não colar na borda
+                const SizedBox(height: 40),
+              ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  // --- WIDGETS AUXILIARES ---
+
+  Widget _buildCharacterSheet(
+    BuildContext context,
+    HunterProvider provider,
+    dynamic hunter,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: panelColor,
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Column(
+        children: [
+          // HUD Topo (HP, DEF, DMG)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            color: Colors.black26,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildHudStat(
+                  'HP',
+                  '${hunter.currentHp}/${hunter.maxHp}',
+                  accentRed,
+                  FontAwesomeIcons.heart,
+                ),
+                Container(width: 1, height: 20, color: Colors.white12),
+                _buildHudStat(
+                  'ATK',
+                  '${hunter.damage}',
+                  pixelPrimaryColor,
+                  AkarIcons.sword,
+                ),
+                Container(width: 1, height: 20, color: Colors.white12),
+                _buildHudStat(
+                  'DEF',
+                  '${hunter.defense}',
+                  Colors.grey,
+                  FontAwesomeIcons.shield,
+                ),
+              ],
+            ),
+          ),
+
+          const Divider(height: 1, color: Colors.white12),
+
+          // Atributos Principais
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "ATRIBUTOS",
+                      style: _pixelTitleStyle.copyWith(
+                        fontSize: 10,
+                        color: Colors.white54,
+                      ),
+                    ),
+                    if (hunter.attributePoints > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: accentGreen.withOpacity(0.2),
+                          border: Border.all(color: accentGreen),
+                        ),
+                        child: Text(
+                          "+${hunter.attributePoints} PONTOS",
+                          style: _pixelValueStyle.copyWith(
+                            fontSize: 8,
+                            color: accentGreen,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildStatRow(
+                  context,
+                  provider,
+                  'FORÇA',
+                  'strength',
+                  hunter.strength,
+                  FontAwesomeIcons.gavel,
+                  strColor,
+                ),
+                _buildStatRow(
+                  context,
+                  provider,
+                  'DESTREZA',
+                  'dexterity',
+                  hunter.dexterity,
+                  FontAwesomeIcons.wind,
+                  dexColor,
+                ),
+                _buildStatRow(
+                  context,
+                  provider,
+                  'INTELIGÊNCIA',
+                  'intelligence',
+                  hunter.intelligence,
+                  FontAwesomeIcons.brain,
+                  intColor,
+                ),
+                _buildStatRow(
+                  context,
+                  provider,
+                  'CONSTITUIÇÃO',
+                  'constitution',
+                  hunter.constitution,
+                  FontAwesomeIcons.heartPulse,
+                  conColor,
+                ),
+                _buildStatRow(
+                  context,
+                  provider,
+                  'VIGOR',
+                  'endurance',
+                  hunter.endurance,
+                  FontAwesomeIcons.personRunning,
+                  endColor,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHudStat(String label, String value, Color color, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.pressStart2p(
+                fontSize: 8,
+                color: Colors.white38,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(value, style: _pixelValueStyle.copyWith(color: Colors.white)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatRow(
+    BuildContext context,
+    HunterProvider provider,
+    String label,
+    String skillKey,
+    int value,
+    IconData icon,
+    Color color,
+  ) {
+    final canSpend = provider.hunter!.attributePoints > 0;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: _pixelBodyStyle.copyWith(color: Colors.white),
+            ),
+          ),
+          Text('$value', style: _pixelValueStyle.copyWith(color: color)),
+          if (canSpend) ...[
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                icon: const Icon(
+                  FontAwesomeIcons.plusSquare,
+                  size: 16,
+                  color: Colors.white,
+                ),
+                onPressed: provider.isLoading
+                    ? null
+                    : () => _spendPoint(context, skillKey),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterBar() {
+    return SizedBox(
+      height: 30,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: _itemFilters.entries.map((entry) {
+          final isSelected = entry.key == _selectedFilter;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: InkWell(
+              onTap: () => setState(() => _selectedFilter = entry.key),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.white : Colors.transparent,
+                  border: Border.all(color: Colors.white),
+                ),
+                child: Text(
+                  entry.value,
+                  style: _pixelTitleStyle.copyWith(
+                    fontSize: 10,
+                    color: isSelected ? Colors.black : Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildInventorySlot(
+    BuildContext context,
+    dynamic slot,
+    dynamic hunter,
+    bool isLoading,
+  ) {
+    final item = slot.item;
+    final bool isEquipped =
+        (hunter.equippedWeaponSlotId == slot.id) ||
+        (hunter.equippedArmorSlotId == slot.id);
+
+    // Definição das cores e textos do botão
+    String btnText = "USAR";
+    Color btnColor = Colors.white24;
+    Color textColor = Colors.white;
+    bool canUse = true;
+
+    if (item.type == ItemType.Equipment) {
+      if (isEquipped) {
+        btnText = "TIRAR";
+        btnColor = Colors.deepPurple.withOpacity(0.5);
+      } else {
+        btnText = "EQUIPAR";
+        btnColor = pixelPrimaryColor.withOpacity(0.2);
+        textColor = pixelPrimaryColor;
+      }
+    } else if (item.type == ItemType.Material) {
+      btnText = "INFO";
+      canUse = false;
+    } else {
+      // Consumíveis e XP
+      btnColor = accentGreen.withOpacity(0.2);
+      textColor = accentGreen;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isEquipped ? goldColor.withOpacity(0.05) : panelColor,
+        border: Border.all(
+          color: isEquipped ? goldColor : Colors.white12,
+          width: 1,
+        ),
+        // Estilo chanfrado igual ao ContractList
+        borderRadius: BorderRadius.zero,
+      ),
+      child: Row(
+        children: [
+          // Ícone Box
+          Container(
+            width: 60,
+            height: 70, // Altura fixa para alinhar
+            color: Colors.black26,
+            child: Center(
+              child: Icon(
+                _getIconForItem(item),
+                color: isEquipped ? goldColor : Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+
+          // Detalhes
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.name,
+                          style: _pixelTitleStyle.copyWith(
+                            fontSize: 10,
+                            color: isEquipped ? goldColor : Colors.white,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        "x${slot.quantity}",
+                        style: _pixelBodyStyle.copyWith(color: Colors.white54),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.description,
+                    style: _pixelBodyStyle.copyWith(
+                      fontSize: 10,
+                      color: Colors.white38,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Botão de Ação
+          SizedBox(
+            height: 70,
+            width: 80,
+            child: ElevatedButton(
+              onPressed: (isLoading || !canUse)
+                  ? null
+                  : () => _useItem(context, slot.id),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: btnColor,
+                foregroundColor: textColor,
+                elevation: 0,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ), // Botão quadrado
+                padding: EdgeInsets.zero,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isEquipped)
+                    const Icon(
+                      FontAwesomeIcons.shieldHalved,
+                      size: 12,
+                      color: Colors.white70,
+                    ),
+                  if (isEquipped) const SizedBox(height: 4),
+                  Text(
+                    btnText,
+                    style: _pixelTitleStyle.copyWith(
+                      fontSize: 8,
+                      color: textColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

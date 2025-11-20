@@ -1,44 +1,61 @@
-import 'package:akar_icons_flutter/akar_icons_flutter.dart';
+import 'package:dailyrpg/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dailyrpg/providers/hunter_provider.dart';
 import 'package:dailyrpg/widgets/boss_status_bar.dart';
-import 'package:google_fonts/google_fonts.dart'; 
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; 
+import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:akar_icons_flutter/akar_icons_flutter.dart';
 
 class ArenaScreen extends StatelessWidget {
   const ArenaScreen({super.key});
 
-  // --- Estilos de Tema ---
-  static const darkBackground = Color(0xFF1A1A1A);
-  static const darkCardColor = Color(0xff2a2a2a);
-  static const pixelPrimaryColor = Color.fromARGB(255, 77, 167, 209);
-  static const xpColor = Color.fromARGB(255, 85, 166, 82);
-  static const goldColor = Colors.amber;
-  static const bossRed = Color(0xFF8B0000); 
-  // ------------------------
+  // --- PALETA "DUNGEON & BLOOD" ---
+  static const Color _bgDark = Color(0xFF050505); // Escuridão total
+  static const Color _stoneDark = Color(0xFF1C1C1C); // Pedra escura
+  static const Color _stoneLight = Color(0xFF333333); // Pedra iluminada
+  static const Color _bloodRed = Color(0xFF8a0b0b); // Vermelho sangue seco
+  static const Color _brightRed = Color(0xFFFF1744); // Vermelho alerta
+  static const Color _ironGrey = Color(0xFF546E7A); // Ferro enferrujado
+  static const Color _gold = Color(0xFFFFD700);
 
-  TextStyle get _bodyTextStyle =>
+  // Estilos de Texto
+  TextStyle get _rpgHeader =>
+      GoogleFonts.pressStart2p(fontSize: 16, color: Colors.white);
+  TextStyle get _rpgSubHeader =>
+      GoogleFonts.pressStart2p(fontSize: 10, color: Colors.white54);
+  TextStyle get _rpgBody =>
       GoogleFonts.pixelifySans(fontSize: 14, color: Colors.white70);
-
-  TextStyle get _pixelTitleStyle =>
-      GoogleFonts.pressStart2p(fontSize: 14, color: Colors.white);
-
-  TextStyle get _sectionTitleStyle =>
-      GoogleFonts.pressStart2p(fontSize: 10, color: pixelPrimaryColor);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkBackground,
+      backgroundColor: _bgDark,
       appBar: AppBar(
-        title: Text(
-          'ARENA DO CHEFE',
-          style: _pixelTitleStyle.copyWith(fontSize: 12),
-        ),
-        backgroundColor: bossRed,
+        backgroundColor: _stoneDark,
         elevation: 0,
         centerTitle: true,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(FontAwesomeIcons.skull, color: Colors.white38, size: 16),
+            const SizedBox(width: 12),
+            Text("CÂMARA DO CHEFE", style: _rpgHeader),
+            const SizedBox(width: 12),
+            const Icon(FontAwesomeIcons.skull, color: Colors.white38, size: 16),
+          ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4),
+          child: Container(
+            height: 4,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [_stoneDark, _bloodRed, _stoneDark],
+              ),
+            ),
+          ),
+        ),
       ),
       body: Consumer<HunterProvider>(
         builder: (context, provider, child) {
@@ -46,154 +63,289 @@ class ArenaScreen extends StatelessWidget {
 
           if (bossStatus == null) {
             return const Center(
-              child: CircularProgressIndicator(color: bossRed),
+              child: CircularProgressIndicator(color: _bloodRed),
             );
           }
 
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Container da Imagem do Boss
-                Container(
-                  width: double.infinity,
-                  height: 250,
-                  margin: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: darkCardColor,
-                    borderRadius: BorderRadius
-                        .zero, // Estilo Pixel Art (sem arredondamento)
-                    border: Border.all(color: Colors.white30, width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: bossRed.withOpacity(0.5),
-                        blurRadius: 8,
-                        spreadRadius: 2,
+          return Column(
+            children: [
+              // 1. MOLDURA DO CHEFE (Estilo Portão de Masmorra)
+              Expanded(
+                flex: 6,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    // Fundo/Imagem do Boss
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        border: Border.all(color: _stoneLight, width: 4),
+                        borderRadius: BorderRadius.circular(4),
+                        // --- ALTERAÇÃO: SOMBRA REMOVIDA ---
+                        // boxShadow: [
+                        //   BoxShadow(
+                        //     color: _bloodRed.withOpacity(0.2),
+                        //     blurRadius: 30,
+                        //     spreadRadius: 5,
+                        //   )
+                        // ],
+                        // ----------------------------------
+                        image: const DecorationImage(
+                          image: AssetImage('assets/images/boss.gif'),
+                          fit: BoxFit.cover,
+                          opacity: 0.8,
+                        ),
                       ),
-                    ],
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/boss.gif'),
+                      child: Container(
+                        // Vinheta escura interna
+                        decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                            radius: 1.2,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.9),
+                            ],
+                            stops: const [0.4, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Informações Sobrepostas (HUD flutuante)
+                    Positioned(
+                      top: 30,
+                      left: 30,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _bloodRed,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.white24),
+                            ),
+                            child: Text(
+                              "PERIGO IMINENTE",
+                              style: _rpgSubHeader.copyWith(
+                                fontSize: 8,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "O DESTRUIDOR",
+                            style: _rpgHeader.copyWith(
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Barra de Vida (Integrada na parte inferior da moldura)
+                    Positioned(
+                      bottom: 25,
+                      left: 25,
+                      right: 25,
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "HP",
+                                style: _rpgSubHeader.copyWith(
+                                  color: _brightRed,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              border: Border.all(color: _ironGrey, width: 2),
+                            ),
+                            child: const BossStatusBar(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 2. PAINEL DE PEDRA (Stats e Ações)
+              Expanded(
+                flex: 4,
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: _stoneDark,
+                    border: Border(top: BorderSide(color: _ironGrey, width: 4)),
+                    image: DecorationImage(
+                      image: AssetImage(
+                        'assets/images/stone_texture.png',
+                      ), // Opcional se tiver textura
                       fit: BoxFit.cover,
+                      opacity: 0.05,
                     ),
                   ),
-                ),
-
-                // Barra de Status do Boss (Mantida a BossStatusBar existente)
-                const BossStatusBar(),
-
-                const SizedBox(height: 24),
-
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Título da Seção
-                      Text(
-                        'RECOMPENSAS PELA DERROTA:',
-                        style: _sectionTitleStyle.copyWith(
-                          color: goldColor,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Card de Recompensa: Moedas
-                      Card(
-                        color: darkCardColor,
-                        elevation: 4,
-                        shape: const BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                          side: BorderSide(color: goldColor, width: 1),
-                        ),
-                        child: ListTile(
-                          leading: Icon(
-                            FontAwesomeIcons.coins,
-                            color: goldColor,
+                      Row(
+                        children: [
+                          const Icon(
+                            FontAwesomeIcons.crown,
+                            color: _gold,
+                            size: 14,
                           ),
-                          title: Text(
-                            'GOLD',
-                            style: _bodyTextStyle.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                          const SizedBox(width: 10),
+                          Text(
+                            "ESPÓLIOS DA VITÓRIA",
+                            style: _rpgSubHeader.copyWith(color: _gold),
                           ),
-                          subtitle: Text(
-                            '${bossStatus.rewardCoin} G',
-                            style: _bodyTextStyle.copyWith(
-                              color: goldColor,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
+                        ],
                       ),
 
+                      const SizedBox(height: 16),
+
+                      // Grid de Recompensas (Cards de Pedra)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStoneCard(
+                              label: "OURO",
+                              value: "+${bossStatus.rewardCoin}",
+                              icon: FontAwesomeIcons.coins,
+                              accent: _gold,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStoneCard(
+                              label: "EXP",
+                              value: "+${bossStatus.rewardXp}",
+                              icon: FontAwesomeIcons.solidStar,
+                              accent: Colors.greenAccent,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const Spacer(),
+
+                      // 3. BOTÃO DE AÇÃO (Estilo Portão/Laje)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 55,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(
+                              0xFF2b0505,
+                            ), // Vermelho muito escuro
+                            foregroundColor: Colors.redAccent,
+                            elevation: 5,
+                            shape: const BeveledRectangleBorder(
+                              side: BorderSide(color: _bloodRed, width: 1),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const HomeScreen(),
+                              ),
+                            );
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(FontAwesomeIcons.scroll, size: 20),
+                              const SizedBox(width: 12),
+                              Text("REALIZAR CONTRATOS", style: _rpgSubHeader),
+                            ],
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 8),
-
-                      // Card de Recompensa: Experiência
-                      Card(
-                        color: darkCardColor,
-                        elevation: 4,
-                        shape: const BeveledRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                          side: BorderSide(color: xpColor, width: 1),
-                        ),
-                        child: ListTile(
-                          leading: Icon(
-                            FontAwesomeIcons.diamond,
-                            color: xpColor,
-                          ),
-                          title: Text(
-                            'EXPERIÊNCIA',
-                            style: _bodyTextStyle.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          subtitle: Text(
-                            '${bossStatus.rewardXp} XP',
-                            style: _bodyTextStyle.copyWith(
-                              color: xpColor,
-                              fontSize: 16,
-                            ),
+                      Center(
+                        child: Text(
+                          "ENFRAQUEÇA O CHEFE COMPLETANDO MISSÕES",
+                          style: _rpgBody.copyWith(
+                            fontSize: 10,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 24),
-
-                // Botão de Ataque (Exemplo)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      // Lógica de Ataque aqui
-                    },
-                    icon: const Icon(AkarIcons.sword, color: Colors.white),
-                    label: Text(
-                      'COMPLETE CONTRATOS PARA ATACAR',
-                      style: _pixelTitleStyle.copyWith(fontSize: 10),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: bossRed,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: const BeveledRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                        side: BorderSide(color: Colors.white54, width: 2),
-                      ),
-                      elevation: 8,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
+              ),
+            ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildStoneCard({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color accent,
+  }) {
+    return Container(
+      height: 70,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        border: Border.all(color: Colors.white10),
+        borderRadius: BorderRadius.circular(2),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              border: Border.all(color: accent.withOpacity(0.5)),
+            ),
+            child: Center(child: Icon(icon, color: accent, size: 18)),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: _rpgSubHeader.copyWith(
+                  fontSize: 8,
+                  color: Colors.white38,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                value,
+                style: _rpgHeader.copyWith(fontSize: 12, color: Colors.white),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
