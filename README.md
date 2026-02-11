@@ -56,7 +56,7 @@ Recompensas: Use o Ouro que você ganhou com seu suor para comprar equipamentos 
 <img src="frontend/screens/boss.png" width="300">
 
 </div>
-Menção: O App possui uma tela de login, usando criptografia para manter os dados dos usuários seguros
+Menção: O App possui uma tela de login e utiliza Tokens.
 
 Chefão: A representação visual da sua luta contra a procrastinação. Ao completar tarefas na vida real, seu herói ataca o Boss. Se deixar tarefas vencerem, é você quem sofre o dano.
 <hr/>
