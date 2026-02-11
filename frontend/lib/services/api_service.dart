@@ -335,24 +335,20 @@ class ApiService {
       // -----------------------------------------
 
       if (response.statusCode == 200) {
-        // 1. Se o corpo for vazio ou string "null"
         if (response.body.isEmpty || response.body == 'null') {
           print("Aviso: API retornou corpo vazio ou nulo.");
-          return []; // Retorna lista vazia em vez de quebrar
+          return []; 
         }
 
         final dynamic decodedData = jsonDecode(response.body);
 
-        // 2. Se o JSON decodificado for nulo
         if (decodedData == null) {
           return [];
         }
 
-        // 3. VERIFICAÇÃO CRÍTICA: É uma lista?
         if (decodedData is List) {
           return decodedData.map((json) => Recipe.fromJson(json)).toList();
         } else {
-          // Se não for lista, imprime o erro e retorna vazio para não crashar
           print(
             "ERRO CRÍTICO: A API não retornou uma Lista. Retornou: ${decodedData.runtimeType}",
           );
@@ -360,11 +356,11 @@ class ApiService {
         }
       } else {
         print("Erro na API: ${response.statusCode}");
-        return []; // Retorna vazio em caso de erro de servidor
+        return []; 
       }
     } catch (e) {
       print('EXCEÇÃO [Craft GET]: $e');
-      return []; // Retorna vazio na exceção para não travar o app
+      return []; 
     }
   }
 
@@ -487,7 +483,7 @@ class ApiService {
     try {
       final headers = await _getAuthHeaders();
       final response = await http.get(
-        Uri.parse('$_baseUrl/Ranking'), // Rota do Controller novo
+        Uri.parse('$_baseUrl/Ranking'), 
         headers: headers,
       );
 
