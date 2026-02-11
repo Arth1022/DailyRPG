@@ -59,8 +59,12 @@ Recompensas: Use o Ouro que você ganhou com seu suor para comprar equipamentos 
 
 Chefão: A representação visual da sua luta contra a procrastinação. Ao completar tarefas na vida real, seu herói ataca o Boss. Se deixar tarefas vencerem, é você quem sofre o dano.
 <hr/>
+<h1>Veja Mais telas e informações no nosso site</h1>
+Site: https://daily-rpg-lading-page.vercel.app/preview
+<hr/>
 Funcionalidades: <br/>
 🗡️ Sistema de Contratos (Gerenciamento de Tasks)
+
 
 Criação de Missões: Adicione tarefas diárias, to-dos.
 
@@ -87,7 +91,7 @@ Loja Personalizável: Compre itens no jogo (armaduras, espadas) ou crie recompen
 
 <hr/>
 
-🚀 Iniciando a Jornada (Instalação)
+🚀 Iniciando a Jornada (Apenas para devs interessados)
 
 ==FuturoPage==
 
@@ -105,6 +109,7 @@ Push para a Branch (git push origin feature/NovaEspada).
 Abra um Pull Request.
 
 OBS: O APP não possui servidor em nuvem, no momento a API esta configurada em um LocalHost MySQL, apenas inicie o localhost (MySQL) e faça a migration.
+Sera necessário inicar o APP via Android Studio, ou fazer deploy usando um DB em nuvem junto com uma hospedagem para a API. (Fique avontade para fazer o deploy) 
 
 📜 Licença
 Este projeto está sob a licença MIT - veja o arquivo LICENSE para detalhes. <br/>
