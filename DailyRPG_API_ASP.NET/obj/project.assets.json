@@ -3646,24 +3646,31 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Arthur\\.nuget\\packages\\": {}
+    "C:\\Users\\Arthur\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\Nova pasta\\DailyRPGbackend\\DailyRPG\\DailyRPG.csproj",
+      "projectUniqueName": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\repositorios\\DailyRPG\\DailyRPG_API_ASP.NET\\DailyRPG.csproj",
       "projectName": "DailyRPG",
-      "projectPath": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\Nova pasta\\DailyRPGbackend\\DailyRPG\\DailyRPG.csproj",
+      "projectPath": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\repositorios\\DailyRPG\\DailyRPG_API_ASP.NET\\DailyRPG.csproj",
       "packagesPath": "C:\\Users\\Arthur\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\Nova pasta\\DailyRPGbackend\\DailyRPG\\obj\\",
+      "outputPath": "C:\\Users\\Arthur\\OneDrive\\Documents\\GitHub\\repositorios\\DailyRPG\\DailyRPG_API_ASP.NET\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Arthur\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Arthur\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -3682,7 +3689,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
       "net9.0": {
@@ -3740,7 +3747,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

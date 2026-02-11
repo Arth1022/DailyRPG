@@ -70,11 +70,9 @@ class _GuildBoardScreenState extends State<GuildBoardScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
-      // --- AQUI É A REMOÇÃO VISUAL IMEDIATA ---
       setState(() {
         _boardItems.remove(item);
       });
-      // ----------------------------------------
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -134,7 +132,6 @@ class _GuildBoardScreenState extends State<GuildBoardScreen> {
     }
   }
 
-  // Gera uma rotação leve para dar aspecto natural (-0.05 a 0.05 radianos)
   double _getRandomRotation(int index) {
     final random = Random(index);
     return (random.nextDouble() * 0.1) - 0.05;

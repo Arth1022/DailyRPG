@@ -162,34 +162,30 @@ class HunterProvider with ChangeNotifier {
 
       _setError(null);
     } catch (e) {
-      print("ERRO AO CARREGAR DADOS INICIAIS: $e");
       _setError(e.toString());
+    } finally {
+      _notify(); 
     }
   }
 
-  // --- ESTA É A FUNÇÃO CORRIGIDA ---
   Future<void> completeContract(int id) async {
-    _setLoading(true);
     try {
       final updatedHunter = await _apiService.completeContract(id);
 
       _hunter = updatedHunter;
-
-      // 1. Apenas remove da lista local (sem re-buscar da API)
-      _contracts.removeWhere((contract) => contract.id == id);
-
-      // 2. Atualiza o chefe (necessário)
-      _bossStatus = await _apiService.fetchBossStatus();
+      
+      _contracts = _contracts.where((contract) => contract.id != id).toList();
+      
+      try {
+        _bossStatus = await _apiService.fetchBossStatus();
+      } catch (_) {}
 
       _setError(null);
+      notifyListeners();
     } catch (e) {
       _setError(e.toString());
-    } finally {
-      // 3. Notifica a tela
-      _setLoading(false);
     }
   }
-  // --- FIM DA CORREÇÃO ---
 
   Future<bool> createContract(Map<String, dynamic> contractData) async {
     _setLoading(true);
@@ -210,11 +206,10 @@ class HunterProvider with ChangeNotifier {
   }
 
   Future<String> surrenderContract(int id) async {
-    _setLoading(true);
     try {
       final result = await _apiService.surrenderContract(id);
 
-      _contracts.removeWhere((contract) => contract.id == id);
+      _contracts = _contracts.where((contract) => contract.id != id).toList();
 
       if (_hunter != null && result.containsKey('remainingHp')) {
         _hunter = HunterUser(
@@ -225,11 +220,9 @@ class HunterProvider with ChangeNotifier {
           currentXp: _hunter!.currentXp,
           nextLevelXp: _hunter!.nextLevelXp,
           currentCoins: _hunter!.currentCoins,
-
           currentHp: result['remainingHp'],
           maxHp: _hunter!.maxHp,
           currentStreak: _hunter!.currentStreak,
-
           strength: _hunter!.strength,
           dexterity: _hunter!.dexterity,
           intelligence: _hunter!.intelligence,
@@ -245,15 +238,11 @@ class HunterProvider with ChangeNotifier {
       }
 
       _setError(null);
-
+      notifyListeners();
       return result['message'] ?? "Contrato abandonado.";
     } catch (e) {
       _setError(e.toString());
       return "Erro: $e";
-    } finally {
-      _setLoading(
-        false,
-      ); // Notifica a UI para redesenhar a barra de vida e a lista
     }
   }
 
@@ -268,7 +257,6 @@ class HunterProvider with ChangeNotifier {
       _setError(null);
     } catch (e) {
       _setError(e.toString());
-
       rethrow;
     } finally {
       _setLoading(false);

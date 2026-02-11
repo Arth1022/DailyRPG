@@ -1,4 +1,4 @@
-import 'package:dailyrpg/screens/guild_board_screen.dart'; // Verifique se o nome do arquivo é este (maiusculas/minusculas)
+import 'package:dailyrpg/screens/guild_board_screen.dart'; 
 import 'package:dailyrpg/screens/ranking_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -8,14 +8,13 @@ import 'package:provider/provider.dart';
 import '../widgets/contract_list.dart';
 import '../widgets/hunter_header.dart';
 
-import '../screens/add_contract_screen.dart';
+// Telas
 import '../screens/shop_screen.dart';
 import '../screens/craft_screen.dart';
 import '../screens/arena_screen.dart';
 import '../screens/battle_screen.dart';
 
 import '../providers/hunter_provider.dart';
-
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -88,7 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _navigateToAddContract(BuildContext context) async {
-    // Agora vai para o Quadro da Guilda em vez do formulário manual direto
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const GuildBoardScreen()),
@@ -131,11 +129,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _navigateToBattle(BuildContext context) async {
-    // 1. Tenta iniciar a batalha no servidor
     final success = await context.read<HunterProvider>().startPvPBattle();
 
     if (success && context.mounted) {
-      // 2. Se sucesso, vai para a tela de luta
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const BattleScreen()),
@@ -188,7 +184,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // CORES E ESTILOS PIXEL
     const darkBackgroundColor = Color.fromARGB(255, 30, 30, 30);
     const primaryPixelColor = Color.fromARGB(255, 77, 167, 209);
     const appBarColor = Color.fromARGB(255, 40, 40, 40);
@@ -222,9 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.more_vert),
               color: appBarColor,
               onSelected: (value) {
-                if (value == 'about') {
-                  // Ação "Sobre"
-                } else if (value == 'logout') {
+                if (value == 'logout') {
                   context.read<HunterProvider>().logout();
                   Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (ctx) => const LoginScreen()),
@@ -252,7 +245,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
 
-        // --- FAB PIXELADO ---
         floatingActionButton: Container(
           decoration: BoxDecoration(
             color: primaryPixelColor,
@@ -287,10 +279,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
-        // --- BARRA DE NAVEGAÇÃO ---
         bottomNavigationBar: BottomNavigationBar(
           onTap: _onNavBarTapped,
-          currentIndex: 0, // Mantém fixo no 0 pois é a Home
+          currentIndex: 0,
           type: BottomNavigationBarType.fixed,
           selectedItemColor: primaryPixelColor,
           unselectedItemColor: Colors.grey[600],
@@ -331,7 +322,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
 
-        // --- CORPO DA TELA ---
         body: Consumer<HunterProvider>(
           builder: (context, provider, child) {
             if (provider.isLoading && provider.hunter == null) {
@@ -423,7 +413,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
 
-                    // -----------------------
                     const SizedBox(height: 24),
 
                     Text(
@@ -435,7 +424,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const Divider(height: 20, color: Colors.white12),
 
-                    const ContractList(),
+                    // --- AQUI ESTAVA O ERRO ---
+                    // Adicionei o Expanded para a lista ocupar o resto da tela
+                    // sem dar erro de altura infinita.
+                    const Expanded(
+                      child: ContractList(),
+                    ),
                   ],
                 ),
               ),
