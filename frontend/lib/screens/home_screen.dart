@@ -424,9 +424,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const Divider(height: 20, color: Colors.white12),
 
-                    // --- AQUI ESTAVA O ERRO ---
-                    // Adicionei o Expanded para a lista ocupar o resto da tela
-                    // sem dar erro de altura infinita.
                     const Expanded(
                       child: ContractList(),
                     ),
