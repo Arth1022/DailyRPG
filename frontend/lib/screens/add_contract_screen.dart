@@ -134,8 +134,7 @@ class _AddContractScreenState extends State<AddContractScreen> {
       fillColor: _inputFill,
       filled: true,
       border: InputBorder
-          .none, // Remove borda padrão para usar Container decoration se quisesse, mas aqui usaremos border customizada
-
+          .none, 
       enabledBorder: const OutlineInputBorder(
         borderSide: BorderSide(color: Colors.white12, width: 1),
         borderRadius: BorderRadius.zero,
