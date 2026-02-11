@@ -17,7 +17,7 @@ Conheça as terras de DailyRPG, tela por tela:
 <div align="center">
 
 
-<img src="frontend/screens/home_screen.png" width="300">
+<img src="frontend/screens/home.png" width="300">
 
 </div>
 
