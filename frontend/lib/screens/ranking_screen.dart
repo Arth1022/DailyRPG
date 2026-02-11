@@ -16,7 +16,6 @@ class _RankingScreenState extends State<RankingScreen> {
   List<RankingProfile> _ranking = [];
   bool _isLoading = true;
 
-  // --- Paleta "Golden Hall" (Ajustada) ---
   // Fundo mais claro (Tom de Pedra/Madeira escura, não preto)
   static const Color _bgDark = Color(0xFF2E2A26);
   static const Color _cardBg = Color(
@@ -90,7 +89,7 @@ class _RankingScreenState extends State<RankingScreen> {
       appBar: AppBar(
         backgroundColor: const Color(
           0xFF1F1B16,
-        ), // Um tom levemente mais escuro que o fundo
+        ), 
         title: Text("HALL DA FAMA", style: _pixelTitle),
         centerTitle: true,
         iconTheme: const IconThemeData(color: _gold),
@@ -141,7 +140,6 @@ class _RankingScreenState extends State<RankingScreen> {
       padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: const BoxDecoration(
         color: _bgDark,
-        // Apenas uma linha divisória sólida
         border: Border(bottom: BorderSide(color: _goldDark, width: 2)),
       ),
       child: Column(
@@ -153,10 +151,9 @@ class _RankingScreenState extends State<RankingScreen> {
             decoration: BoxDecoration(
               color: const Color(
                 0xFF151515,
-              ), // Fundo escuro sólido para o ícone
+              ), 
               shape: BoxShape.circle,
               border: Border.all(color: _gold, width: 3),
-              // Sombra removida aqui
             ),
             child: const Center(
               child: Icon(FontAwesomeIcons.trophy, color: _gold, size: 40),
@@ -186,7 +183,6 @@ class _RankingScreenState extends State<RankingScreen> {
       height: cardHeight,
       decoration: BoxDecoration(
         color: _cardBg,
-        // Borda Sólida
         border: isTop3
             ? Border.all(color: rankColor, width: 2)
             : Border(
@@ -195,7 +191,6 @@ class _RankingScreenState extends State<RankingScreen> {
                 top: const BorderSide(color: Colors.white10, width: 1),
                 right: const BorderSide(color: Colors.white10, width: 1),
               ),
-        // Sombra dura apenas para dar volume ao card (estilo bloco)
         boxShadow: const [
           BoxShadow(color: Colors.black45, offset: Offset(0, 4), blurRadius: 0),
         ],
