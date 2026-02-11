@@ -48,7 +48,7 @@ O Combate: Lute contra heróis de outros jogadores, ganhe XP e COINS ao derrota-
 
 </div>
 
-Recompensas: Use o Ouro que você ganhou com seu suor para comprar equipamentos que melhoram seus atributos no jogo, ou compre "Recompensas Reais" que você mesmo define (como "Tirar uma folga" ou "Comprar um lanche").
+Recompensas: Use o Ouro que você ganhou com seu suor para comprar equipamentos que melhoram seus atributos no jogo.
 
 <div aling="center"><h2>🐉 A Toca do Chefe</h2></div>
 
@@ -103,6 +103,8 @@ Commit suas mudanças (git commit -m 'Adiciona nova espada lendária').
 Push para a Branch (git push origin feature/NovaEspada).
 
 Abra um Pull Request.
+
+OBS: O APP não possui servidor em nuvem, no momento a API esta configurada em um LocalHost MySQL, apenas inicie o localhost (MySQL) e faça a migration.
 
 📜 Licença
 Este projeto está sob a licença MIT - veja o arquivo LICENSE para detalhes. <br/>
